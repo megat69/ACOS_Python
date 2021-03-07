@@ -1,0 +1,14 @@
+{
+  "BSOD": {
+    "SysError": "Une erreur est survenue dans votre système",
+    "RebootMsg": "Veuillez redémarrer le système.",
+    "CorruptedKey": "Clé de registre '{key}' corrompue.\nVeuillez checker manuellement ou réinstallez le logiciel.",
+    "GeneralDataKey": "Clé localisée dans 'general_data.json'",
+    "UnableLoadRegistry": "Impossible de charger la base de registre.",
+    "IconNotFound": "Impossible de trouver l'îcone ACOS.",
+    "RegistryErrorUnknown": "Une erreur inconnue est survenue durant l'ouverture de la base de registre."
+  },
+  "LOGIN": {
+    "IncorrectPassword": "Mot de passe incorrect."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "CURRENT_THEME": "dark",
+  "LOADING_BACKGROUND_COLOR": "black",
+  "LOGO_PATH": "assets/ACOS_Logo.png",
+  "MAIN_BG_COLOR": {
+    "dark": "#161614",
+    "light": "#fcf2b1",
+    "light-dark": "#262626"
+  },
+  "MAIN_FG_COLOR": {
+    "dark": "#E4E5DA",
+    "light": "#230C08"
+  },
+  "NAVBAR_BG_COLOR": {
+    "dark": "#950063",
+    "light": "#6FC214"
+  },
+  "NAVBAR_SIZE": 64,
+  "WIN_HEIGHT": 512,
+  "WIN_WIDTH": 1024,
+  "SYSTEM_LANG": "fr",
+  "SOFTWARES_FOLDER": "softwares",
+  "FULLSCREEN_ENABLED": false,
+  "USERS_FOLDER": "users",
+  "USERDATA_NAME": ".userdata",
+  "ICONS_SIZES": 16,
+  "APP_FRAME_BACKGROUND_COLOR": "#950063"
+}

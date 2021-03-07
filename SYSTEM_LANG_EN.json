@@ -1,0 +1,14 @@
+{
+  "BSOD": {
+    "SysError": "Your system ran into an error",
+    "RebootMsg": "Please restart your system.",
+    "CorruptedKey": "Registry key '{key}' corrupted.\nPlease manually check the key or reinstall the software.",
+    "GeneralDataKey": "Key stored in 'general_data.json'",
+    "UnableLoadRegistry": "Registry could not be loaded.",
+    "IconNotFound": "Icon not found",
+    "RegistryErrorUnknown": "An unknown error occured while trying to open registry."
+  },
+  "LOGIN": {
+    "IncorrectPassword": "Incorrect password."
+  }
+}
