@@ -653,7 +653,7 @@ def ACOS_Menu_click(event):
 		# ------------------ FRAME ELEMENTS ------------------
 		button_close_all = tk.Button(
 			globals()["menu_frame_MAIN"],
-			text = "Close all windows.",
+			text = TRANSLATIONS["ACOS_MENU"]["CloseAllWindows"],
 			command = close_all_windows,
 			font = ("Arial", 16),
 			width = globals()["menu_frame"].winfo_width() // 2,
@@ -667,7 +667,7 @@ def ACOS_Menu_click(event):
 
 		shutdown_button = tk.Button(
 			globals()["menu_frame"],
-			text = "Shutdown",
+			text = TRANSLATIONS["ACOS_MENU"]["Shutdown"],
 			command = shutdown,
 			font=("Arial", 16),
 			bg = "#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],

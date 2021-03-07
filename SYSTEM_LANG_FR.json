@@ -10,5 +10,9 @@
   },
   "LOGIN": {
     "IncorrectPassword": "Mot de passe incorrect."
+  },
+  "ACOS_MENU": {
+    "Shutdown": "Arrêter",
+    "CloseAllWindows": "Fermer toutes les fenêtres"
   }
 }
