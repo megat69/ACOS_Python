@@ -3,8 +3,80 @@ The ACOS "operating system".
 Is a software, but whatver, still fun to use.
 """
 from main import *
+import os
+import sys
 import json
 from random import randint
+
+def finish_boot(window, REGISTRY):
+	# ------------------ LOGO DISPLAYING ------------------
+	if "LOGO_PATH" not in REGISTRY:
+		ThrowBSOD(window, corrupted_key("LOGO_PATH"))
+		sys.exit(1)
+
+	logo_size = 128
+
+	try:
+		globals()["logo"] = ImageTk.PhotoImage(
+			Image.open(
+				REGISTRY["LOGO_PATH"]
+			).resize(
+				(logo_size, logo_size),
+				Image.NEAREST
+			)
+		)
+	except:
+		ThrowBSOD(window, "Logo image not found")
+
+	# Displaying it
+	logo_label = tk.Label(
+		window,
+		image = globals()["logo"],
+		bg = REGISTRY["LOADING_BACKGROUND_COLOR"]
+	)
+	logo_label.place(
+		x = WIN_WIDTH // 2 - logo_size // 2,
+		y = WIN_HEIGHT // 2 - logo_size
+	)
+
+	# Clearing memory
+	del logo_size
+
+	# ------------------ PROGRESS BAR ------------------
+	progress = 0
+	current_progress = tk.StringVar()
+	current_progress.set("░" * 10)
+
+	# Displaying it
+	progress_label = tk.Label(
+		window,
+		textvariable=current_progress,
+		bg=REGISTRY["LOADING_BACKGROUND_COLOR"],
+		fg="white",
+		font=("Impact", 20)
+	)
+	progress_label.place(
+		x=WIN_WIDTH // 2 - 100,
+		y=WIN_HEIGHT // 2 + 35
+	)
+
+	def increment_progress():
+		nonlocal progress
+		nonlocal current_progress
+		nonlocal logo_label
+		current_progress.set("▓" * progress + "░" * (10 - progress))
+		progress += 1
+		if progress <= 10:
+			window.after(randint(100, 300), increment_progress)
+		else:
+			start_OS(window, REGISTRY)
+			progress_label.place_forget()
+			progress_label.destroy()
+			logo_label.place_forget()
+			logo_label.destroy()
+
+	# ------------------ WINDOW DISPLAYING ------------------
+	window.after(randint(100, 300), increment_progress)
 
 # ------------------ ESSENTIAL VARS ------------------
 WIN_WIDTH, WIN_HEIGHT = 1024, 512
@@ -70,72 +142,13 @@ if __name__ == '__main__':
 	except:
 		ThrowBSOD(window, corrupted_key("LOADING_BACKGROUND_COLOR"))
 
-	# ------------------ LOGO DISPLAYING ------------------
-	if "LOGO_PATH" not in REGISTRY:
-		ThrowBSOD(window, corrupted_key("LOGO_PATH"))
-		sys.exit(1)
+	# ! ------------------ DETECTING IF NO USER ------------------
+	if REGISTRY['USERS_FOLDER'] not in os.listdir("ROOT/") or \
+			os.listdir(f"ROOT/{REGISTRY['USERS_FOLDER']}") == []:
+		# Then no user detected
+		create_new_user(window, REGISTRY)
+	else:
+		finish_boot(window, REGISTRY)
 
-	logo_size = 128
-
-	try:
-		logo = ImageTk.PhotoImage(
-			Image.open(
-				REGISTRY["LOGO_PATH"]
-			).resize(
-				(logo_size, logo_size),
-				Image.NEAREST
-			)
-		)
-	except:
-		ThrowBSOD(window, "Logo image not found")
-
-	# Displaying it
-	logo_label = tk.Label(
-		window,
-		image=logo,
-		bg=REGISTRY["LOADING_BACKGROUND_COLOR"]
-	)
-	logo_label.place(
-		x = WIN_WIDTH // 2 - logo_size //2,
-		y = WIN_HEIGHT // 2 - logo_size
-	)
-
-	# Clearing memory
-	del logo_size
-
-	# ------------------ PROGRESS BAR ------------------
-	progress = 0
-	current_progress = tk.StringVar()
-	current_progress.set("░" * 10)
-
-	# Displaying it
-	progress_label = tk.Label(
-		window,
-		textvariable = current_progress,
-		bg = REGISTRY["LOADING_BACKGROUND_COLOR"],
-		fg = "white",
-		font = ("Impact", 20)
-	)
-	progress_label.place(
-		x = WIN_WIDTH // 2 - 100,
-		y = WIN_HEIGHT // 2 + 35
-	)
-
-	def increment_progress():
-		global progress
-		global current_progress
-		global logo_label
-		current_progress.set("▓" * progress + "░" * (10 - progress))
-		progress += 1
-		if progress <= 10:
-			window.after(randint(100, 300), increment_progress)
-		else:
-			start_OS(window, REGISTRY)
-			progress_label.place_forget()
-			progress_label.destroy()
-			logo_label.place_forget()
-			logo_label.destroy()
-
-	# ------------------ WINDOW DISPLAYING ------------------
-	window.after(randint(100, 300), increment_progress)
 	window.mainloop()
+

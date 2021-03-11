@@ -13,6 +13,7 @@
   },
   "ACOS_MENU": {
     "Shutdown": "Arrêter",
-    "CloseAllWindows": "Fermer toutes les fenêtres"
+    "CloseAllWindows": "Fermer toutes les fenêtres",
+    "Settings": "Paramètres"
   }
 }

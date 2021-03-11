@@ -23,10 +23,10 @@ def gen_hash(method:str="env", **kwargs):
 		json.dump(json_content, json_file, indent = 4)
 		json_file.close()
 	else:
-		return None
+		return bcrypt.gensalt().decode()
 
 
-def get_hash(method:str="env", **kwargs):
+def get_hash(method:str="env", *args, **kwargs):
 	if method.lower() == "env":
 		load_dotenv()
 		return os.getenv("HASH")
@@ -35,13 +35,13 @@ def get_hash(method:str="env", **kwargs):
 		json_content = json.load(json_file)
 		json_file.close()
 		return json_content[kwargs["key"]]
-	else:
-		return None
+	elif method.lower() == "given":
+		return args[0]
 
-def cipher_password(password:(str, bytes), method:str="env", **kwargs):
+def cipher_password(password:(str, bytes), method:str="env", *args, **kwargs):
 	if isinstance(password, str):
 		password = password.encode()
-	return bcrypt.hashpw(password, get_hash(method, **kwargs).encode())
+	return bcrypt.hashpw(password, get_hash(method, *args, **kwargs).encode())
 
 def get_password(file:str, key:str):
 	json_file = open(file, "r")
@@ -54,3 +54,9 @@ def check_password(password:(str, bytes), method:str="env", **kwargs):
 		password = password.encode()
 	return bcrypt.checkpw(password, get_password(**kwargs))
 
+def compare_passwords(password:(str, bytes), ciphered_password:(str, bytes)):
+	if isinstance(password, str):
+		password = password.encode()
+	if isinstance(ciphered_password, str):
+		ciphered_password = ciphered_password.encode()
+	return bcrypt.checkpw(password, ciphered_password)
