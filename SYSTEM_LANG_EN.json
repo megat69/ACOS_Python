@@ -14,6 +14,11 @@
   "ACOS_MENU": {
     "Shutdown": "Shutdown",
     "CloseAllWindows": "Close all windows",
-    "Settings": "Settings"
+    "Settings": "Settings",
+    "TaskManager": "Task manager",
+    "TaskKill": "Kill Task",
+    "TaskName": "Task name",
+    "MemoryUsage": "Memory usage",
+    "ProcessorUsage": "Processor usage"
   }
 }

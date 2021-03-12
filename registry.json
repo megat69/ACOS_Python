@@ -31,5 +31,6 @@
         "image_viewer",
         "paintapp",
         "textrock"
-    ]
+    ],
+    "NOTIFICATION_STAYING_TIME": 5000
 }

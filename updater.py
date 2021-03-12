@@ -2,24 +2,25 @@
 Updater script for ACOS.
 """
 import os
+import shutil
 
-def rewriter(path:str):
+def rewriter():
 	# Rewriting the old files
-	for element in os.listdir(path):
-		if os.path.isdir(element):
-			rewriter(path + "/" + element)
+	for element in os.listdir("update"):
 
 		if element != "updater.py":
-			print(f"Rewriting '{path}/{element}'...")
-			old_file = open(path + "/" + element, "w", encoding="utf-8")
-			new_file = open("update/" + path + "/" + element, "r", encoding="utf-8")
+			print(f"Rewriting '{element}'...")
+			old_file = open(element, "w", encoding="utf-8")
+			new_file = open("update/" + element, "r", encoding="utf-8")
 			try:
 				old_file.writelines(new_file.readlines())
 			except:
 				pass
 			old_file.close()
 			new_file.close()
-			print(f"{path}/{element} rewritten.")
+			print(f"{element} rewritten.")
+
+	shutil.rmtree("update")
 
 if __name__ == "__main__":
-	rewriter("update")
+	rewriter()

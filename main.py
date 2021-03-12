@@ -8,6 +8,7 @@ from functools import partial
 from math import isclose
 from random import randint
 from tkinter import filedialog
+import psutil
 
 from PIL import Image, ImageTk
 
@@ -265,6 +266,9 @@ def start_OS(window: tk.Tk, REGISTRY: dict):
 		y=window.winfo_height() // 2 + 32,
 		height=24
 	)
+
+	import ROOT.softwares.software_api
+	ROOT.softwares.software_api.__set_window(window)
 
 def compute_password(entry_name: str, window: tk.Tk):
 	"""
@@ -535,7 +539,7 @@ def launched_app(app, min_size, max_size, event):
 			globals()["navbar_size"],
 			round(globals()["navbar_size"] + globals()["REGISTRY"]["WIN_HEIGHT"] * 0.25)
 		)
-		)
+	)
 
 	def Drag(event):
 		"""
@@ -698,28 +702,279 @@ def ACOS_Menu_click(event):
 			window.destroy()
 			sys.exit(0)
 
+		def launch_task_manager():
+			background_color = globals()["REGISTRY"]["APP_FRAME_BACKGROUND_COLOR"]
+
+			# Creates the frame
+			globals()[f"frame_task_manager"] = tk.Frame(
+				window,
+				bg=background_color
+			)
+
+			def Lift(event):
+				"""
+				Lifts the frame on top.
+				"""
+				globals()["frame_task_manager"].lift()
+
+			globals()["frame_task_manager_last_coords"] = \
+				(randint(
+					globals()["navbar_size"],
+					round(globals()["navbar_size"] + globals()["REGISTRY"]["WIN_WIDTH"] * 0.25)
+				), randint(
+					globals()["navbar_size"],
+					round(globals()["navbar_size"] + globals()["REGISTRY"]["WIN_HEIGHT"] * 0.25)
+				)
+			)
+
+			def Drag(event):
+				"""
+				Generates the dragging of the window.
+				"""
+				x = event.x + (globals()["frame_task_manager"].winfo_width() // 2)
+				y = event.y + (globals()["frame_task_manager"].winfo_height() // 2)
+
+				if isclose(globals()["frame_task_manager_last_coords"][0],
+		            x, rel_tol=5) and isclose(globals()["frame_task_manager_last_coords"][1],
+                     y, rel_tol=5):
+
+					globals()["frame_task_manager"].place(
+						x=x,
+						y=y
+					)
+
+					globals()["frame_task_manager_last_coords"] = (x, y)
+
+			globals()["frame_task_manager"].bind('<B1-Motion>', Drag)
+			globals()["frame_task_manager"].bind('<Button-1>', Lift)
+
+			# Generates the icon
+			icon_size = globals()["REGISTRY"]["ICONS_SIZES"]
+
+			globals()["task_manager_icon"] = ImageTk.PhotoImage(
+				Image.open(
+					"assets/ACOS_TaskManager.png"
+				).resize(
+					(icon_size, icon_size)
+				)
+			)
+
+			app_icon_label = tk.Label(
+				globals()["frame_task_manager"],
+				image=globals()["task_manager_icon"],
+				bg=background_color
+			)
+			app_icon_label.place(
+				x=2,
+				y=2,
+				width=icon_size,
+				height=icon_size
+			)
+
+			# Creates and places the app title
+			app_title = tk.Label(
+				globals()["frame_task_manager"],
+				text=TRANSLATIONS["ACOS_MENU"]["TaskManager"],
+				bg=background_color,
+				fg=globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
+			)
+			app_title.place(
+				x=icon_size + 2,
+				y=0
+			)
+
+			def quit_app():
+				nonlocal tasks
+				nonlocal task_kill_buttons
+				globals()["frame_task_manager"].place_forget()
+				globals()["frame_task_manager"].destroy()
+				for task in tasks:
+					task.destroy()
+				for btn in task_kill_buttons:
+					btn.destroy()
+
+
+			# Creates the width of the app frame
+			parent_width = randint(
+				round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.5),
+				round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.7)
+			)
+			parent_height = randint(
+				round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.5),
+				round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.7)
+			)
+
+			# Quit icon
+			globals()["task_manager_quit_icon"] = ImageTk.PhotoImage(
+				Image.open("assets/ACOS_Bin.png").resize((16, 16))
+			)
+
+			# Creates the quit button
+			quit_button = tk.Button(
+				globals()["frame_task_manager"],
+				image=globals()["task_manager_quit_icon"],
+				borderwidth=0,
+				command=quit_app,
+				bg=background_color,
+				activebackground=background_color
+			)
+			quit_button.place(
+				x=parent_width - icon_size - 2,
+				y=2,
+				height=icon_size,
+				width=icon_size
+			)
+
+			# Creates a new MAIN frame inside the app frame
+			globals()["frame_task_manager_MAIN"] = tk.Frame(
+				globals()["frame_task_manager"],
+				width=parent_width - 8,
+				height=parent_height - icon_size - 8
+			)
+			globals()["frame_task_manager_MAIN"].place(
+				x=4,
+				y=icon_size + 4,
+				width=parent_width - 8,
+				height=parent_height - icon_size - 8
+			)
+
+			def kill_task(task, row):
+				"""
+				Kills the given task.
+				"""
+				nonlocal tasks
+				nonlocal task_kill_buttons
+				# Task destroying
+				try:
+					globals()[task].place_forget()
+				except:
+					try:
+						globals()[task].grid_forget()
+					except:
+						try:
+							globals()[task].pack_forget()
+						except:
+							pass
+				# Elements destroying
+				tasks[row - 1].grid_forget()
+				task_kill_buttons[row - 1].grid_forget()
+				tasks[row - 1].destroy()
+				task_kill_buttons[row - 1].destroy()
+
+				globals()[task].destroy()
+				del globals()[task]
+
+				import ROOT.softwares.software_api
+				ROOT.softwares.software_api.notify(
+					TRANSLATIONS["ACOS_MENU"]["TaskManager"],
+					f"Killed task {task.replace('frame_', '', 1)}."
+				)
+
+			# ! TASK MANAGER CODE
+			# Columns indications
+			column0 = tk.Label(
+				globals()["frame_task_manager_MAIN"],
+				text = TRANSLATIONS["ACOS_MENU"]["TaskName"],
+				font = ("Impact", 12)
+			)
+			column0.grid(row=0, column=0)
+
+			process = psutil.Process(os.getpid())
+
+			column1 = tk.Label(
+				globals()["frame_task_manager_MAIN"],
+				text = TRANSLATIONS["ACOS_MENU"]["ProcessorUsage"] + " :\n" + str(process.cpu_percent()) + "%"
+			)
+			column1.grid(row=0, column=1)
+
+			column2 = tk.Label(
+				globals()["frame_task_manager_MAIN"],
+				text = TRANSLATIONS["ACOS_MENU"]["MemoryUsage"] + " :\n" +\
+					str(round(process.memory_info().rss / 1024 ** 2, 2))\
+					+ f"MBs ({process.memory_percent()})"
+			)
+			column2.grid(row=0, column=2)
+
+			# TODO : Scrollbar
+
+
+			tasks = []
+			task_kill_buttons = []
+			for variable in globals():
+				if variable.startswith("frame_") and not variable.endswith("_MAIN")\
+						and not variable.startswith("frame_task_manager"):
+					# If it is an app, we display it
+					tasks.append(
+						tk.Label(
+							globals()["frame_task_manager_MAIN"],
+							text = variable.replace("frame_", "", 1)
+						)
+					)
+					tasks[-1].grid(
+						row = len(tasks),
+						column = 0
+					)
+
+					# And we add the task kill button
+					task_kill_buttons.append(
+						tk.Button(
+							globals()["frame_task_manager_MAIN"],
+							text = TRANSLATIONS["ACOS_MENU"]["TaskKill"],
+							command = partial(kill_task, variable, len(tasks))
+						)
+					)
+					task_kill_buttons[-1].grid(
+						row = len(tasks),
+						column = 1
+					)
+
+			# TODO : Processor use, memory consumption, etc.
+			# TODO : real time values
+
+			# Finally places the MAIN frame in the software one
+			globals()["frame_task_manager"].place(
+				x=globals()["frame_task_manager_last_coords"][0],
+				y=globals()["frame_task_manager_last_coords"][1],
+				width=parent_width,
+				height=parent_height
+			)
+
 		# ------------------ FRAME ELEMENTS ------------------
+		btn_params = {
+			"font": ("Arial", 16),
+            "bg": "#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],
+            "fg": globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
+		}
+
 		button_close_all = tk.Button(
 			globals()["menu_frame_MAIN"],
 			text=TRANSLATIONS["ACOS_MENU"]["CloseAllWindows"],
 			command=close_all_windows,
-			font=("Arial", 16),
 			width=globals()["menu_frame"].winfo_width() // 2,
-			bg="#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],
-			fg=globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
+			**btn_params
 		)
 		button_close_all.grid(
 			row=0,
 			column=0
 		)
 
+		# Task manager
+		task_manager_button = tk.Button(
+			globals()["menu_frame_MAIN"],
+			text = TRANSLATIONS["ACOS_MENU"]["TaskManager"],
+			command = launch_task_manager,
+			**btn_params
+		)
+		task_manager_button.grid(
+			row = 1,
+			column = 0
+		)
+
 		shutdown_button = tk.Button(
 			globals()["menu_frame"],
 			text=TRANSLATIONS["ACOS_MENU"]["Shutdown"],
 			command=shutdown,
-			font=("Arial", 16),
-			bg="#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],
-			fg=globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
+			**btn_params
 		)
 		shutdown_button.place(
 			x=0,

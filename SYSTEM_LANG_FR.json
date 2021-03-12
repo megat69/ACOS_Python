@@ -14,6 +14,11 @@
   "ACOS_MENU": {
     "Shutdown": "Arrêter",
     "CloseAllWindows": "Fermer toutes les fenêtres",
-    "Settings": "Paramètres"
+    "Settings": "Paramètres",
+    "TaskManager": "Gestionnaire des Tâches",
+    "TaskKill": "Fin de Tâche",
+    "TaskName": "Nom de la tâche",
+    "MemoryUsage": "Utilisation de mémoire",
+    "ProcessorUsage": "Utilisation du processeur"
   }
 }
