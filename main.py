@@ -716,6 +716,7 @@ def ACOS_Menu_click(event):
 				Lifts the frame on top.
 				"""
 				globals()["frame_task_manager"].lift()
+				task_manager_code()
 
 			globals()["frame_task_manager_last_coords"] = \
 				(randint(
@@ -856,13 +857,28 @@ def ACOS_Menu_click(event):
 						except:
 							pass
 				# Elements destroying
-				tasks[row - 1].grid_forget()
-				task_kill_buttons[row - 1].grid_forget()
-				tasks[row - 1].destroy()
-				task_kill_buttons[row - 1].destroy()
+				try:
+					tasks[row - 1].grid_forget()
+				except:
+					pass
+				try:
+					task_kill_buttons[row - 1].grid_forget()
+				except:
+					pass
+				try:
+					tasks[row - 1].destroy()
+				except:
+					pass
+				try:
+					task_kill_buttons[row - 1].destroy()
+				except:
+					pass
 
-				globals()[task].destroy()
-				del globals()[task]
+				try:
+					globals()[task].destroy()
+					del globals()[task]
+				except KeyError:
+					pass
 
 				import ROOT.softwares.software_api
 				ROOT.softwares.software_api.notify(
@@ -900,36 +916,46 @@ def ACOS_Menu_click(event):
 
 			tasks = []
 			task_kill_buttons = []
-			for variable in globals():
-				if variable.startswith("frame_") and not variable.endswith("_MAIN")\
-						and not variable.startswith("frame_task_manager"):
-					# If it is an app, we display it
-					tasks.append(
-						tk.Label(
-							globals()["frame_task_manager_MAIN"],
-							text = variable.replace("frame_", "", 1)
-						)
-					)
-					tasks[-1].grid(
-						row = len(tasks),
-						column = 0
-					)
+			def task_manager_code():
+				nonlocal tasks
+				nonlocal task_kill_buttons
 
-					# And we add the task kill button
-					task_kill_buttons.append(
-						tk.Button(
-							globals()["frame_task_manager_MAIN"],
-							text = TRANSLATIONS["ACOS_MENU"]["TaskKill"],
-							command = partial(kill_task, variable, len(tasks))
-						)
-					)
-					task_kill_buttons[-1].grid(
-						row = len(tasks),
-						column = 1
-					)
+				# Emptying them
+				for i in range(len(tasks)):
+					tasks[i].grid_forget()
+					tasks[i].destroy()
+					task_kill_buttons[i].grid_forget()
+					task_kill_buttons[i].destroy()
 
-			# TODO : Processor use, memory consumption, etc.
-			# TODO : real time values
+				# If the variable is an app
+				for variable in globals():
+					if variable.startswith("frame_") and not variable.endswith("_MAIN") \
+							and not variable.startswith("frame_task_manager"):
+						# If it is an app, we display it
+						tasks.append(
+							tk.Label(
+								globals()["frame_task_manager_MAIN"],
+								text=variable.replace("frame_", "", 1)
+							)
+						)
+						tasks[-1].grid(
+							row=len(tasks),
+							column=0
+						)
+
+						# And we add the task kill button
+						task_kill_buttons.append(
+							tk.Button(
+								globals()["frame_task_manager_MAIN"],
+								text=TRANSLATIONS["ACOS_MENU"]["TaskKill"],
+								command=partial(kill_task, variable, len(tasks))
+							)
+						)
+						task_kill_buttons[-1].grid(
+							row=len(tasks),
+							column=1
+						)
+			task_manager_code()
 
 			# Finally places the MAIN frame in the software one
 			globals()["frame_task_manager"].place(
@@ -968,6 +994,88 @@ def ACOS_Menu_click(event):
 		task_manager_button.grid(
 			row = 1,
 			column = 0
+		)
+
+		apps_canvas = tk.Canvas(
+			globals()["menu_frame_MAIN"],
+			width = globals()["menu_frame"].winfo_width(),
+			height = round(globals()["menu_frame"].winfo_height() * 0.8),
+			bg = btn_params["bg"]
+		)
+
+		scrollbar = tk.Scrollbar(
+			apps_canvas
+		)
+		scrollbar.pack(
+			side = tk.RIGHT,
+			fill = tk.Y
+		)
+		apps_frame = tk.Canvas(
+			apps_canvas,
+			yscrollcommand = scrollbar.set,
+			bg = btn_params["bg"]
+		)
+
+		# Adding the apps inside
+		done_apps = []
+		iterations = 0
+		for software in os.listdir("ROOT/" + globals()["REGISTRY"]["SOFTWARES_FOLDER"]):
+			# Imports the software file
+			try:
+				importlib.import_module(f"ROOT.{globals()['REGISTRY']['SOFTWARES_FOLDER']}.{software}.{software}")
+			except ModuleNotFoundError:
+				continue
+			# Fetches its modules
+			for i in dir(all_softwares):
+				if i.startswith("__"):  # If it is built-in, we just ignore it
+					continue
+				# We get the attributes of the folder module
+				item = getattr(all_softwares, i)
+				# We get the real code file
+				try:
+					app = getattr(item, i)
+				except AttributeError:
+					continue
+
+				# Launching MASSIVE try block, if error, it just gets entirely ignored
+				try:
+					# If we already did the app OR it is not in the user's taskbar
+					if app.software_dir in done_apps:
+						continue
+					
+					globals()["MENU_app_buttons_" + str(iterations) + "_NAME"] = tk.Label(
+						apps_canvas,
+						text = app.software_name,
+						**btn_params
+					)
+					globals()["MENU_app_buttons_" + str(iterations) + "_NAME"].pack()
+					globals()["MENU_app_buttons_" + str(iterations) + "_NAME"].bind("<ButtonPress-1>", partial(
+						launched_app, app, app.min_size, app.max_size
+					))
+
+					done_apps.append(app.software_dir)
+
+					iterations += 1
+				except Exception as e:
+					try:
+						del globals()["MENU_app_tkimages_" + str(iterations)]
+						del globals()["MENU_app_buttons_" + str(iterations) + "_NAME"]
+					except:
+						pass
+					print(e)
+
+		apps_frame.pack(
+			side = tk.LEFT,
+			fill = tk.BOTH
+		)
+		scrollbar.config(command = apps_frame.yview)
+
+
+		apps_canvas.grid(
+			row = 2,
+			column = 0,
+			rowspan = 6,
+			columnspan = 2
 		)
 
 		shutdown_button = tk.Button(
