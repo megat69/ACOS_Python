@@ -10,12 +10,15 @@ import urllib.request
 from packaging import version
 import zipfile
 import os
+import importlib
+import ROOT.softwares as all_softwares
+from PIL import Image, ImageTk
 
 app_icon = "ACOS_Settings.png"
 software_name = "Settings"
 software_dir = "settings"
 is_GUI = True
-min_size = None
+min_size = (700, 350)
 max_size = None
 
 def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
@@ -90,6 +93,135 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 	navbar_size_button = tk.Button(frame, text="SAVE", command=apply_navbar_size)
 	navbar_size_button.grid(row=3, column=2, sticky="w")
 
+	# ! Taskbar elements
+	taskbar_frame = tk.Frame(
+		frame,
+		width = width,
+		height = round(height * 0.3)
+	)
+	taskbar_canvas = tk.Canvas(
+		taskbar_frame
+	)
+	taskbar_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+
+	scrollbar = tk.Scrollbar(taskbar_frame, orient=tk.VERTICAL, command=taskbar_canvas.yview)
+	scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+	taskbar_canvas.configure(yscrollcommand=scrollbar.set)
+	taskbar_canvas.bind("<Configure>", lambda e: taskbar_canvas.configure(scrollregion=taskbar_canvas.bbox("all")))
+
+	main_taskbar_frame = tk.Frame(taskbar_frame)
+	taskbar_canvas.create_window((0, 0), window = main_taskbar_frame, anchor = "nw")
+
+	userdata = open("ROOT/" + software_api.REGISTRY["USERS_FOLDER"]\
+					+ "/" + software_api.current_user + "/" + ".userdata.json", "r")
+	user_taskbar = json.load(userdata)["taskbar"]
+	userdata.close()
+
+	done_apps = []
+	iterations = 0
+	for software in os.listdir("ROOT/" + software_api.REGISTRY["SOFTWARES_FOLDER"]):
+		# Imports the software file
+		try:
+			importlib.import_module(f"ROOT.{software_api.REGISTRY['SOFTWARES_FOLDER']}.{software}.{software}")
+		except ModuleNotFoundError:
+			continue
+		# Fetches its modules
+		for i in dir(all_softwares):
+			if i.startswith("__"):  # If it is built-in, we just ignore it
+				continue
+			# We get the attributes of the folder module
+			item = getattr(all_softwares, i)
+			# We get the real code file
+			try:
+				app = getattr(item, i)
+			except AttributeError:
+				continue
+
+			# Launching MASSIVE try block, if error, it just gets entirely ignored
+			try:
+				# If we already did the app OR it is not in the user's taskbar
+				if app.software_dir in done_apps:
+					continue
+
+				# App icon
+				globals()[app.software_dir + "_tkimage"] = ImageTk.PhotoImage(
+					Image.open(
+						f"ROOT/{software_api.REGISTRY['SOFTWARES_FOLDER']}/{app.software_dir}/{app.app_icon}"
+					).resize((32, 32))
+				)
+
+				globals()[app.software_dir + "_is_checkbox_checked"] = tk.IntVar()
+				globals()[app.software_dir + "_is_checkbox_checked"].set(
+					0 if app.software_dir not in user_taskbar else 1
+				)
+
+				globals()[app.software_dir + "_checkbox"] = tk.Checkbutton(
+					main_taskbar_frame,
+					variable = globals()[app.software_dir + "_is_checkbox_checked"],
+					text = app.software_name
+				)
+				globals()[app.software_dir + "_checkbox"].grid(
+					row = iterations // 2,
+					column = 0 if iterations % 2 == 0 else 2
+				)
+
+				# Icon
+				globals()[app.software_dir + "_icon"] = tk.Label(
+					main_taskbar_frame,
+					image = globals()[app.software_dir + "_tkimage"]
+				)
+				globals()[app.software_dir + "_icon"].grid(
+					row=iterations // 2,
+					column = 1 if iterations % 2 == 0 else 3
+				)
+
+				done_apps.append(app.software_dir)
+
+				iterations += 1
+			except Exception as e:
+				try:
+					del globals()["MENU_app_tkimages_" + str(iterations)]
+					del globals()["MENU_app_buttons_" + str(iterations) + "_NAME"]
+				except:
+					pass
+				print(e)
+
+	def save_taskbar():
+		taskbar_elements = []
+		for variable in globals():
+			if variable.endswith("_is_checkbox_checked"):
+				if globals()[variable].get() == 1:
+					taskbar_elements.append(variable.replace("_is_checkbox_checked", "", 1))
+
+		# Dumping it
+		userdata = open("ROOT/" + software_api.REGISTRY["USERS_FOLDER"] \
+		                + "/" + software_api.current_user + "/" + ".userdata.json", "r")
+		userdata_contents = json.load(userdata)
+		userdata.close()
+		userdata_contents["taskbar"] = taskbar_elements
+		userdata = open("ROOT/" + software_api.REGISTRY["USERS_FOLDER"] \
+		                + "/" + software_api.current_user + "/" + ".userdata.json", "w")
+		json.dump(userdata_contents, userdata, indent=4)
+		userdata.close()
+
+		software_api.notify(software_name, "Taskbar saved !")
+
+
+
+	taskbar_save_button = tk.Button(
+		main_taskbar_frame,
+		text = "SAVE",
+		command = save_taskbar
+	)
+	taskbar_save_button.grid(
+		row = iterations,
+		column = 0,
+		columnspan = 4
+	)
+
+	taskbar_frame.grid(row=4, column=0, columnspan=6)
+
 	# Update checker
 	def check_updates_launch():
 		check_updates()
@@ -99,7 +231,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "Check for updates",
 		command = check_updates_launch
 	)
-	update_checker_btn.grid(row=4, column=0, columnspan=2)
+	update_checker_btn.grid(row=5, column=0, columnspan=2)
 
 	def install_update_launch():
 		install_update()
