@@ -28,6 +28,7 @@
     "DEFAULT_APPS": [
         "settings",
         "SYSTEM_Filesystem",
+        "app_browser",
         "image_viewer",
         "paintapp",
         "textrock"

@@ -1,0 +1,4 @@
+psutil
+pillow
+bcrypt
+colormap
