@@ -4,6 +4,9 @@ A bunch of APIs for the ACOS sotwares.
 import json
 import tkinter as tk
 
+# os.chdir(os.path.dirname(os.path.realpath(__file__)))
+# os.chdir("../../../")
+
 # The registry
 try:
 	registry_file = open("../../registry.json", "r")
@@ -88,3 +91,60 @@ def notify(title:str, text:str):
 		from ...main import ThrowBSOD, corrupted_key
 		ThrowBSOD(__window, corrupted_key("NOTIFICATION_STAYING_TIME"))
 
+def get_all_widgets(window:tk.Frame):
+	_list = window.winfo_children()
+
+	for item in _list:
+		if item.winfo_children():
+			_list.extend(item.winfo_children())
+
+	return _list
+
+
+def destroy_all_widgets(window:tk.Frame):
+	"""
+	Destroys all widgets in given window.
+	"""
+	widget_list = get_all_widgets(window)
+	for item in widget_list:
+		try:
+			item.place_forget()
+		except:
+			try:
+				item.grid_forget()
+			except:
+				item.pack_forget()
+		item.destroy()
+
+def recreate_string(variable:(list, tuple), char_in_between:str=""):
+    """
+    Recreates a string from a list.
+    Parameter 'variable' (list) : The list to put together to a string.
+    Parameter 'char_in_between' (str) : The char to put between the elements to recompose. Nothing by default.
+    """
+    temp_str = ""
+    for element in variable:
+        temp_str += str(element) + char_in_between
+    return temp_str
+
+def remove_suffix(variable:str, condition:bool=True, chars_amount:int=1):
+    """
+    Removes the suffix of a string.
+    Parameter 'variable' (str) : The text where the suffix has to be removed.
+    Parameter 'chars_amount' (int) : Default : 1. Number of chars to remove.
+    Parameter 'condition' (bool) : Default : True. Will only remove if the condition is True.
+    """
+    if condition is True:  # If the condition is respected
+        variable = variable[:-chars_amount]  # Suffix gets removed
+    return variable
+
+def remove_prefix(variable:str, condition:bool=True, chars_amount:int=1):
+    """
+        Removes the prefix of a string.
+        Parameter 'variable' (str) : The text where the prefix has to be removed.
+        Parameter 'chars_amount' (int) : Default : 1. Number of chars to remove.
+        Parameter 'condition' (bool) : Default : True. Will only remove if the condition is True.
+        """
+    if condition is True:  # If the condition is respected
+        variable = variable[chars_amount:len(variable)]  # Prefix gets removed
+    return variable
