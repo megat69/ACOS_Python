@@ -6,7 +6,7 @@ import os
 import json
 
 app_icon = "Paintapp_Logo.png"
-software_name = "Painting App"
+software_name = "Paintapp"
 software_dir = "paintapp"
 is_GUI = True
 min_size = (600, 400)
@@ -214,16 +214,16 @@ def getter(widget, filename):
 
 	# Path to the saving directory
 	path = f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}"\
-			     f"/images/paintapp/"
+			     f"/_images/_{software_dir}/"
 
 	# If it doesn't exits, we create all the needed folders
 	if not os.path.exists(path):
 		try:
-			os.mkdir(f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}/images")
+			os.mkdir(f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}/_images")
 		except:
 			pass
 		try:
-			os.mkdir(f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}/images/paintapp")
+			os.mkdir(f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}/_images/_{software_dir}")
 		except:
 			pass
 
@@ -239,6 +239,13 @@ def getter(widget, filename):
 		os.remove(filename + ".eps")
 	except:
 		pass
+
+	software_api.notify(
+		software_name, "Saved image to " \
+               + path.replace("../", "").replace(software_api.REGISTRY["USERS_FOLDER"], "", 1)\
+		               +filename.replace("../", "")+".png"
+	)
+
 	os.chdir("../../../")
 
 def import_image(path):
@@ -251,7 +258,7 @@ def import_image(path):
 	try:
 		globals()["imported_image_"+str(nbr_imported_images)] = tk.PhotoImage(
 			file=f"../../{software_api.REGISTRY['USERS_FOLDER']}/{software_api.current_user}"
-			     f"/images/paintapp/" + path_content.replace("../", "")
+			     f"/_images/_{software_dir}/" + path_content.replace("../", "")
 		)
 	except Exception as e:
 		path.set(TRANSLATIONS["UnableLoadImage"])
@@ -270,6 +277,8 @@ def import_image(path):
 
 	# Increments the number of imported images
 	nbr_imported_images += 1
+
+	software_api.notify(software_name, "Imported image")
 
 	os.chdir("../../../")
 
