@@ -93,6 +93,22 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 	navbar_size_button = tk.Button(frame, text="SAVE", command=apply_navbar_size)
 	navbar_size_button.grid(row=3, column=2, sticky="w")
 
+	# Notification duration entry
+	notification_duration_label = tk.Label(frame, text="Notification duration : ", bg=background, fg=foreground)
+	notification_duration_label.grid(row=3, column=0, sticky="e")
+
+	notification_duration_value = tk.StringVar()
+	notification_duration_value.set(software_api.REGISTRY["NOTIFICATION_STAYING_TIME"])
+
+	notification_duration_entry = tk.Entry(frame, textvariable=notification_duration_value)
+	notification_duration_entry.grid(row=3, column=1, sticky="w")
+
+	def apply_notification_duration():
+		change_registry_value("NOTIFICATION_STAYING_TIME", notification_duration_value, to_int=True)
+
+	notification_duration_button = tk.Button(frame, text="SAVE", command=apply_notification_duration)
+	notification_duration_button.grid(row=3, column=2, sticky="w")
+
 	# ! Taskbar elements
 	taskbar_frame = tk.Frame(
 		frame,

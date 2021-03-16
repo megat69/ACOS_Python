@@ -55,3 +55,5 @@ def ask_color(frame):
 		globals()["main_button"].config(fg = "black")
 	else:
 		globals()["main_button"].config(fg="white")
+
+	software_api.notify(software_name, f"Picked {color[1]}")

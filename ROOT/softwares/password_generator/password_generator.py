@@ -88,6 +88,7 @@ def password_generate():
 	password = "".join([random.choice(all_strings) for _ in range(random.randint(password_min, password_max))])
 	globals()["inputbox"].delete(0, tk.END)
 	globals()["inputbox"].insert(0, password)
+	software_api.notify(software_name, "Password generated.")
 
 """class App:
 
