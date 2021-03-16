@@ -597,7 +597,7 @@ def launched_app(app, min_size, max_size, event):
 		y=0
 	)
 
-	def quit_app():
+	def quit_app(app):
 		globals()[f"frame_{app.software_dir}_{instance}"].place_forget()
 		globals()[f"frame_{app.software_dir}_{instance}"].destroy()
 
@@ -631,7 +631,7 @@ def launched_app(app, min_size, max_size, event):
 		globals()[f"frame_{app.software_dir}_{instance}"],
 		image=globals()["quit_icon_" + str(opened_apps_amount)],
 		borderwidth=0,
-		command=quit_app,
+		command=partial(quit_app, app),
 		bg=background_color,
 		activebackground=background_color
 	)
@@ -660,6 +660,51 @@ def launched_app(app, min_size, max_size, event):
 		globals()[f"frame_{app.software_dir}_{instance}_MAIN"],
 		width=parent_width - 8,
 		height=parent_height - icon_size - 8
+	)
+
+	# Creates the draggable pixels
+	globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"] = tk.Frame(
+		globals()[f"frame_{app.software_dir}_{instance}"]
+	)
+
+	def Resize(minsize, maxsize, event):
+		nonlocal parent_width
+		nonlocal parent_height
+		if minsize is None or maxsize is None or not (event.x + parent_width > maxsize[0] or event.x + parent_width < minsize[0]):
+			parent_width = event.x + parent_width
+		if minsize is None or maxsize is None or not (event.y + parent_height > maxsize[1] or event.y + parent_height < minsize[1]):
+			parent_height = event.y + parent_height
+		globals()[f"frame_{app.software_dir}_{instance}"].place(
+			x = globals()[f"{app.software_dir}_{instance}_last_coords"][0],
+			y = globals()[f"{app.software_dir}_{instance}_last_coords"][1],
+			width = parent_width,
+			height = parent_height
+		)
+		globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].place(
+			x = parent_width - 8,
+			y = parent_height - 8,
+			width = 8,
+			height = 8
+		)
+		globals()[f"frame_{app.software_dir}_{instance}_MAIN"].place(
+			x = 4,
+			y = icon_size + 4,
+			width = parent_width - 8,
+			height = parent_height - icon_size - 8
+		)
+		quit_button.place(
+			x = parent_width - icon_size - 2,
+			y = 2,
+			height = icon_size,
+			width = icon_size
+		)
+
+	globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].bind("<B1-Motion>", partial(Resize, app.min_size, app.max_size))
+	globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].place(
+		x = parent_width - 8,
+		y = parent_height - 8,
+		width = 8,
+		height = 8
 	)
 
 	# Finally places the MAIN frame in the software one
@@ -930,7 +975,8 @@ def ACOS_Menu_click(event):
 				# If the variable is an app
 				for variable in globals():
 					if variable.startswith("frame_") and not variable.endswith("_MAIN") \
-							and not variable.startswith("frame_task_manager"):
+							and not variable.startswith("frame_task_manager") and \
+							not variable.endswith("_resizeable_frame"):
 						# If it is an app, we display it
 						tasks.append(
 							tk.Label(
@@ -1165,7 +1211,10 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		json.dump(userdata, userdata_file, indent=4)
 		userdata_file.close()
 
-		general_data = {"last_connected_user": username}
+		general_data_file = open("general_data.json", "r")
+		general_data = json.load(general_data_file)
+		general_data_file.close()
+		general_data["last_connected_user"] = username
 		general_data_file = open("general_data.json", "w")
 		json.dump(general_data, general_data_file, indent=4)
 		general_data_file.close()
@@ -1265,7 +1314,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		global username
 		global pfp_path
 		global pfp_name
-		if path is not None:
+		if path not in (None, ""):
 			pfp_path = path
 		else:
 			pfp_path = "assets/ACOS_Logo.png"

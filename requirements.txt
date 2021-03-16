@@ -2,3 +2,7 @@ psutil
 pillow
 bcrypt
 colormap
+easydev
+python-dotenv
+requests
+packaging

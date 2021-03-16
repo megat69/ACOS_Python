@@ -20,7 +20,7 @@
     "WIN_WIDTH": 1024,
     "SYSTEM_LANG": "fr",
     "SOFTWARES_FOLDER": "softwares",
-    "FULLSCREEN_ENABLED": false,
+    "FULLSCREEN_ENABLED": true,
     "USERS_FOLDER": "users",
     "USERDATA_NAME": ".userdata",
     "ICONS_SIZES": 16,
@@ -28,6 +28,7 @@
     "DEFAULT_APPS": [
         "settings",
         "SYSTEM_Filesystem",
+        "Micr0n",
         "app_browser",
         "image_viewer",
         "paintapp",
