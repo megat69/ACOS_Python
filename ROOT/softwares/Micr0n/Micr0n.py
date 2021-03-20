@@ -10,6 +10,7 @@ import sys
 import os
 import platform
 import logging as _logging
+import requests
 
 app_icon = "ACOS_Micron.png"
 software_name = "Micr0n"
@@ -17,9 +18,10 @@ software_dir = "Micr0n"
 is_GUI = True
 min_size = (800, 440)
 max_size = None
+default_size = (900, 640)
 
 
-
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # Fix for PyCharm hints warnings
 WindowUtils = cef.WindowUtils()
 
@@ -35,24 +37,57 @@ logger = _logging.getLogger("tkinter_.py")
 # Tk 8.5 doesn't support png images
 IMAGE_EXT = ".png" if tk.TkVersion > 8.5 else ".gif"
 
+def test_connection():
+	url = "http://www.google.com"
+	timeout = 5
+	try:
+		request = requests.get(url, timeout=timeout)
+		return True
+	except (requests.ConnectionError, requests.Timeout):
+		return False
+
 def on_app_launch(frame:tk.Frame, width:int=900, height:int=640):
-	logger.setLevel(_logging.CRITICAL)
-	stream_handler = _logging.StreamHandler()
-	formatter = _logging.Formatter("[%(filename)s] %(message)s")
-	stream_handler.setFormatter(formatter)
-	logger.addHandler(stream_handler)
-	logger.info("CEF Python {ver}".format(ver=cef.__version__))
-	logger.info("Python {ver} {arch}".format(
-		ver=platform.python_version(), arch=platform.architecture()[0]))
-	logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
-	assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
-	sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-	# Tk must be initialized before CEF otherwise fatal error (Issue #306)
-	app = MainFrame(frame)
-	settings = {}
-	if MAC:
-		settings["external_message_pump"] = True
-	cef.Initialize(settings=settings)
+	# Testing if connection
+	if test_connection() is True:
+		if "no_connection_title" in globals():
+			globals()["no_connection_title"].pack_forget()
+			globals()["no_connection_title"].destroy()
+			globals()["no_connection_subtitle"].pack_forget()
+			globals()["no_connection_subtitle"].destroy()
+
+		logger.setLevel(_logging.CRITICAL)
+		stream_handler = _logging.StreamHandler()
+		formatter = _logging.Formatter("[%(filename)s] %(message)s")
+		stream_handler.setFormatter(formatter)
+		logger.addHandler(stream_handler)
+		logger.info("CEF Python {ver}".format(ver=cef.__version__))
+		logger.info("Python {ver} {arch}".format(
+			ver=platform.python_version(), arch=platform.architecture()[0]))
+		logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
+		assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+		sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+		# Tk must be initialized before CEF otherwise fatal error (Issue #306)
+		app = MainFrame(frame)
+		settings = {}
+		if MAC:
+			settings["external_message_pump"] = True
+		cef.Initialize(settings=settings)
+	else:
+		if not "no_connection_title" in globals():
+			globals()["no_connection_title"] = tk.Label(
+				frame,
+				text = "Oh No !",
+				font = ("Impact", 22)
+			)
+			globals()["no_connection_title"].pack()
+			globals()["no_connection_subtitle"] = tk.Label(
+				frame,
+				text = "Sounds like no connection is available...",
+				font = ("Impact", 14)
+			)
+			globals()["no_connection_subtitle"].pack()
+		# Testing again
+		frame.after(5000, on_app_launch, frame, width, height)
 
 class MainFrame(tk.Frame):
 	def __init__(self, frame):
@@ -227,9 +262,7 @@ class BrowserFrame(tk.Frame):
 			logger.debug("CloseBrowser")
 			self.browser.CloseBrowser(True)
 			self.clear_browser_references()
-		else:
-			logger.debug("tk.Frame.destroy")
-			self.destroy()
+			cef.Shutdown()
 
 	def clear_browser_references(self):
 		# Clear browser references that you keep anywhere in your
@@ -381,4 +414,3 @@ class NavigationBar(tk.Frame):
 				self.forward_button.config(state=tk.DISABLED)
 				self.forward_state = tk.DISABLED
 		self.after(100, self.update_state)
-

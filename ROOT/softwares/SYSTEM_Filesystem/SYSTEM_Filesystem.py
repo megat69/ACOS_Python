@@ -14,6 +14,7 @@ software_dir = "SYSTEM_Filesystem"
 is_GUI = True
 min_size = None
 max_size = None
+default_size = None
 
 is_admin = False
 userdata = {}
@@ -178,6 +179,15 @@ def on_app_launch(frame: tk.Frame, width: int, height: int):
 			# Refresh
 			change_path(path)
 
+		def rename_file(file, new_name):
+			new_name = new_name.get()
+			new_name = software_api.remove_prefix(new_name, new_name.startswith(".")\
+			                                      or new_name.startswith("_"))
+			os.rename(file, software_api.recreate_string(file.split("/")[:-1], "/") + new_name\
+			          + "." + extension_raw)
+			# Refresh
+			change_path(path)
+
 		elements.append(
 			(
 				tk.Label(frame, image=globals()[filesystem_element + "_icon"], **general_params),
@@ -192,16 +202,36 @@ def on_app_launch(frame: tk.Frame, width: int, height: int):
 					+ software_api.REGISTRY["USERS_FOLDER"]:
 				if is_admin is True:
 					elements[-1] = list(elements[-1])
+					# Delete button
 					elements[-1].append(
 						tk.Button(frame, text="Delete", command=partial(delete_file, path + "/" + \
 							filesystem_element), **general_params)
 					)
+					# Rename entry
+					elements[-1].append(
+						tk.Entry(frame, width=10)
+					)
+					# Rename button
+					elements[-1].append(
+						tk.Button(frame, text="Rename", command=partial(rename_file, path + "/" + \
+						                                                filesystem_element, elements[-1][-1]), **general_params)
+					)
 					elements[-1] = tuple(elements[-1])
 			else:
 				elements[-1] = list(elements[-1])
+				# Delete button
 				elements[-1].append(
 					tk.Button(frame, text="Delete", command=partial(delete_file, path + "/" + \
-						filesystem_element), **general_params)
+					                                                filesystem_element), **general_params)
+				)
+				# Rename entry
+				elements[-1].append(
+					tk.Entry(frame, width=10)
+				)
+				# Rename button
+				elements[-1].append(
+					tk.Button(frame, text="Rename", command=partial(rename_file, path + "/" + \
+					                                                filesystem_element, elements[-1][-1]), **general_params)
 				)
 				elements[-1] = tuple(elements[-1])
 

@@ -8,6 +8,7 @@ software_dir = "app_browser"
 is_GUI = True
 min_size = (700, 350)
 max_size = None
+default_size = None
 
 def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 	# -------------------- "WINDOW" CREATION --------------------

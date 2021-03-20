@@ -9,6 +9,7 @@ software_dir = "password_generator"
 is_GUI = True
 min_size = None
 max_size = None
+default_size = (700, 500)
 
 def on_app_launch(frame:tk.Frame, width:int, height:int):
 	os.chdir(os.path.dirname(os.path.realpath(__file__)))

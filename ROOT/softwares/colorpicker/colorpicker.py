@@ -9,6 +9,7 @@ software_dir = "colorpicker"
 is_GUI = True
 min_size = (150, 50)
 max_size = (150, 50)
+default_size = (150, 50)
 
 def on_app_launch(frame:tk.Frame, width:int=100, height:int=50):
 	frame.config(

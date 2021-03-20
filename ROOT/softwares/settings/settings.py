@@ -20,6 +20,7 @@ software_dir = "settings"
 is_GUI = True
 min_size = (700, 350)
 max_size = None
+default_size = None
 
 def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 	background = "#f0f0f0"
@@ -44,6 +45,25 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 
 	theme_button = tk.Button(frame, text="SAVE", command=apply_theme)
 	theme_button.grid(row=0, column=2, sticky="w")
+
+	# Status bar position dropdown
+	status_bar_position_label = tk.Label(frame, text="Status bar position : ", bg=background, fg=foreground)
+	status_bar_position_label.grid(row=4, column=0, sticky="e")
+
+	status_bar_position_value = tk.StringVar()
+	status_bar_position_value.set("Top" if software_api.REGISTRY["TOPBAR_POSITION_ON_TOP"] else "Bottom")
+
+	status_bar_position_dropdown = tk.OptionMenu(frame, status_bar_position_value, "Top", "Bottom")
+	status_bar_position_dropdown.grid(row=4, column=1, sticky="w")
+
+	def apply_status_bar_position():
+		change_registry_value("TOPBAR_POSITION_ON_TOP",
+            True if status_bar_position_value.get() == "Top" else False,
+            is_string=True
+        )
+
+	status_bar_position_button = tk.Button(frame, text="SAVE", command=apply_status_bar_position)
+	status_bar_position_button.grid(row=4, column=2, sticky="w")
 
 	# Lang dropdown
 	lang_label = tk.Label(frame, text="Lang : ", bg=background, fg=foreground)
@@ -236,7 +256,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		columnspan = 4
 	)
 
-	taskbar_frame.grid(row=4, column=0, columnspan=6)
+	taskbar_frame.grid(row=5, column=0, columnspan=6)
 
 	# Update checker
 	def check_updates_launch():
@@ -247,7 +267,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "Check for updates",
 		command = check_updates_launch
 	)
-	update_checker_btn.grid(row=5, column=0, columnspan=2)
+	update_checker_btn.grid(row=frame.grid_size()[1], column=0, columnspan=2)
 
 	def install_update_launch():
 		install_update()
@@ -262,7 +282,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "Please shutdown the system and manually start the 'updater.py' script."
 	)
 
-def change_registry_value(key:str, var:tk.StringVar, is_string:bool=False, to_int:bool=False):
+def change_registry_value(key:str, var:(tk.StringVar, str), is_string:bool=False, to_int:bool=False):
 	REGISTRY = deepcopy(software_api.REGISTRY)
 	if is_string is False:
 		try:
