@@ -20,7 +20,7 @@
     "WIN_WIDTH": 1024,
     "SYSTEM_LANG": "fr",
     "SOFTWARES_FOLDER": "softwares",
-    "FULLSCREEN_ENABLED": true,
+    "FULLSCREEN_ENABLED": false,
     "USERS_FOLDER": "users",
     "USERDATA_NAME": ".userdata",
     "ICONS_SIZES": 16,
@@ -34,5 +34,8 @@
         "paintapp",
         "textrock"
     ],
-    "NOTIFICATION_STAYING_TIME": 5000
+    "NOTIFICATION_STAYING_TIME": 5000,
+    "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
+    "SPACING_BETWEEN_TOPBAR_ELEMENTS": 10,
+    "TOPBAR_POSITION_ON_TOP": true
 }

@@ -9,6 +9,9 @@ from math import isclose
 from random import randint
 from tkinter import filedialog
 import psutil
+import subprocess
+import datetime
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 from PIL import Image, ImageTk
 
@@ -300,6 +303,7 @@ def compute_password(entry_name: str, window: tk.Tk):
 		general_data_file.close()
 
 		# ------------------ SETUP NAVBAR ------------------
+		setup_topbar(window, globals()["REGISTRY"])
 		setup_navbar(window, globals()["REGISTRY"], user)
 	else:
 		incorrect_password_label = tk.Label(
@@ -505,6 +509,106 @@ def setup_navbar(window, REGISTRY, user):
 	globals()["navbar_size"] = navbar_size
 	globals()["root"] = window
 
+def setup_topbar(window, REGISTRY):
+	"""
+	Sets the topbar with the system information (date, time, WiFi info, battery...)
+	"""
+	try:
+		navbar_size = REGISTRY["NAVBAR_SIZE"]
+	except:
+		ThrowBSOD(window, corrupted_key("NAVBAR_SIZE"))
+
+	# Create the frame
+	globals()["topbar_frame"] = tk.Frame(
+		window,
+		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+
+	try:
+		topbar_spacing = REGISTRY["SPACING_BETWEEN_TOPBAR_ELEMENTS"]
+	except:
+		ThrowBSOD(window, corrupted_key("SPACING_BETWEEN_TOPBAR_ELEMENTS"))
+
+	def get_date():
+		# Getting the date
+		date = datetime.datetime.now()
+		try:
+			date = date.strftime(REGISTRY["DATETIME_FORMAT"])
+		except:
+			ThrowBSOD(window, corrupted_key("DATETIME_FORMAT"))
+		return date
+
+	def set_date():
+		globals()["topbar_datetime"].config(text=get_date())
+
+	def set_date_loop():
+		set_date()
+		window.after(1000, set_date_loop)
+
+	# Placing the date and time
+	globals()["topbar_datetime"] = tk.Label(
+		globals()["topbar_frame"],
+		text = get_date(),
+		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+	globals()["topbar_datetime"].pack(side=tk.RIGHT)
+
+	# Making it update
+	window.after(1000, set_date_loop)
+
+	"""# Sound
+	def get_volume():
+		# https://stackoverflow.com/questions/20828752/python-change-master-application-volume
+		sessions = AudioUtilities.GetAllSessions()
+		for session in sessions:
+			volume = session._ctl.QueryInterface(ISimpleAudioVolume)
+			if session.Process and session.Process.name() == "vlc.exe":
+				print(volume.GetMasterVolume())
+				return volume.GetMasterVolume()
+
+	def update_volume():
+		globals()["topbar_volume"].config(text=str(get_volume()))
+		window.after(4000, update_volume)
+
+	globals()["topbar_volume"] = tk.Label(
+		globals()["topbar_frame"],
+		text = str(get_volume()),
+		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+	globals()["topbar_volume"].pack(side=tk.RIGHT, padx=topbar_spacing)"""
+
+	# Battery displaying
+	def get_battery_string():
+		battery = psutil.sensors_battery()
+		return f"{battery.percent}%{', Charging' if battery.power_plugged else ''}"
+	
+	def set_battery_string():
+		globals()["topbar_battery_status"].config(text=get_battery_string())
+		window.after(10000, set_battery_string)
+
+	globals()["topbar_battery_status"] = tk.Label(
+		globals()["topbar_frame"],
+		text = get_battery_string(),
+		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+	globals()["topbar_battery_status"].pack(side=tk.RIGHT, padx=topbar_spacing)
+
+	# Finally placing the topbar
+	try:
+		topbar_position = REGISTRY["TOPBAR_POSITION_ON_TOP"]
+	except:
+		ThrowBSOD(window, corrupted_key("TOPBAR_POSITION_ON_TOP"))
+
+	globals()["topbar_frame"].place(
+		x = navbar_size,
+		y = 0 if topbar_position is True else window.winfo_height() - (navbar_size // 4),
+		width = window.winfo_width() - navbar_size,
+		height = navbar_size // 4
+	)
+
 def launched_app(app, min_size, max_size, event):
 	"""
 	Attributes a frame to the app, and launches it.
@@ -602,24 +706,28 @@ def launched_app(app, min_size, max_size, event):
 		globals()[f"frame_{app.software_dir}_{instance}"].destroy()
 
 	# Creates the width of the app frame
-	parent_width = randint(
-		round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.5),
-		round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.7)
-	)
-	# If it doesn't match the app requirements
-	if min_size is not None and min_size[0] > parent_width:
-		parent_width = min_size[0]
-	elif max_size is not None and max_size[0] < parent_width:
-		parent_width = max_size[0]
-	parent_height = randint(
-		round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.5),
-		round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.7)
-	)
-	# If it doesn't match the app requirements
-	if min_size is not None and min_size[1] > parent_height:
-		parent_height = min_size[1]
-	elif max_size is not None and max_size[1] < parent_height:
-		parent_height = max_size[1]
+	if app.default_size is None:
+		parent_width = randint(
+			round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.5),
+			round(globals()["REGISTRY"]["WIN_WIDTH"] * 0.7)
+		)
+
+		# If it doesn't match the app requirements
+		if min_size is not None and min_size[0] > parent_width:
+			parent_width = min_size[0]
+		elif max_size is not None and max_size[0] < parent_width:
+			parent_width = max_size[0]
+		parent_height = randint(
+			round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.5),
+			round(globals()["REGISTRY"]["WIN_HEIGHT"] * 0.7)
+		)
+		# If it doesn't match the app requirements
+		if min_size is not None and min_size[1] > parent_height:
+			parent_height = min_size[1]
+		elif max_size is not None and max_size[1] < parent_height:
+			parent_height = max_size[1]
+	else:
+		parent_width, parent_height = app.default_size
 
 	# Quit icon
 	globals()["quit_icon_" + str(opened_apps_amount)] = ImageTk.PhotoImage(
