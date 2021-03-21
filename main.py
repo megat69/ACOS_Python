@@ -9,9 +9,7 @@ from math import isclose
 from random import randint
 from tkinter import filedialog
 import psutil
-import subprocess
 import datetime
-from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 
 from PIL import Image, ImageTk
 
@@ -388,6 +386,7 @@ def setup_navbar(window, REGISTRY, user):
 	# ------------------ NAVBAR ELEMENTS ------------------
 	done_apps = []
 	user_taskbar = get_userdata(window, user, REGISTRY)["taskbar"]
+	startup_apps = get_userdata(window, user, REGISTRY)["startup_apps"]
 
 	if "SOFTWARES_FOLDER" not in REGISTRY:
 		ThrowBSOD(window, corrupted_key("SOFTWARES_FOLDER"))
@@ -398,7 +397,8 @@ def setup_navbar(window, REGISTRY, user):
 		# Imports the software file
 		try:
 			importlib.import_module(f"ROOT.{REGISTRY['SOFTWARES_FOLDER']}.{software}.{software}")
-		except ModuleNotFoundError:
+		except ModuleNotFoundError as e:
+			print("Module not found :", e)
 			continue
 		# Fetches its modules
 		for i in dir(all_softwares):
@@ -417,6 +417,7 @@ def setup_navbar(window, REGISTRY, user):
 				# If we already did the app OR it is not in the user's taskbar
 				if app.software_dir in done_apps or app.software_dir not in user_taskbar:
 					continue
+				print("Loaded", app.software_dir)
 
 				globals()["app_tkimages_" + str(iterations)] = \
 					ImageTk.PhotoImage(
@@ -450,6 +451,10 @@ def setup_navbar(window, REGISTRY, user):
 
 				globals()["app_buttons_" + str(iterations)].pack(padx=5)
 
+				if app.software_dir in startup_apps:
+					globals()["navbar_size"] = navbar_size
+					launched_app(app, app.min_size, app.max_size, None)
+
 				done_apps.append(app.software_dir)
 
 				iterations += 1
@@ -459,7 +464,7 @@ def setup_navbar(window, REGISTRY, user):
 					del globals()["app_buttons_" + str(iterations)]
 				except:
 					pass
-				print(e)
+				print("Error :", e)
 
 	# del iterations
 
@@ -1311,7 +1316,8 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 			"HASH": globals()["password_salt"],
 			"PASSWORD": globals()["password"],
 		    "taskbar": REGISTRY["DEFAULT_APPS"],
-			"is_admin": True
+			"is_admin": True,
+            "startup_apps": []
 		}
 
 		userdata_file = open("ROOT/" + REGISTRY["USERS_FOLDER"] \

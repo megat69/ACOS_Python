@@ -1,6 +1,17 @@
-import bcrypt
-from dotenv import load_dotenv
 import os
+try:
+	import bcrypt
+except ModuleNotFoundError:
+	import platform
+	platform = platform.platform()
+	if platform == "Windows":
+		os.system("pip install bcrypt-3.2.0-cp36-abi3-win_amd64.whl")
+	elif platform == "Darwin":
+		os.system("pip3 install bcrypt-3.2.0-cp36-abi3-macosx_10_9_x86_64.whl")
+	else:
+		os.system("pip3 install bcrypt-3.2.0-cp36-abi3-manylinux2010_x86_64.whl")
+	import bcrypt
+from dotenv import load_dotenv
 import json
 
 def gen_hash(method:str="env", **kwargs):
