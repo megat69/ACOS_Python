@@ -18,7 +18,7 @@
     "TaskManager": "Gestionnaire des Tâches",
     "TaskKill": "Fin de Tâche",
     "TaskName": "Nom de la tâche",
-    "MemoryUsage": "Utilisation de mémoire",
+    "MemoryUsage": "Utilisation de la mémoire",
     "ProcessorUsage": "Utilisation du processeur"
   }
 }

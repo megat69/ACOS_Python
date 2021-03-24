@@ -134,7 +134,7 @@ if __name__ == '__main__':
 		except:
 			ThrowBSOD(window, corrupted_key("WIN_HEIGHT"))
 
-	window.geometry(f"{WIN_WIDTH}x{WIN_HEIGHT}")
+	window.geometry(f"{WIN_WIDTH}x{WIN_HEIGHT}+100+100")
 
 	# Window BG for loading
 	try:

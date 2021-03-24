@@ -303,6 +303,7 @@ def compute_password(entry_name: str, window: tk.Tk):
 		# ------------------ SETUP NAVBAR ------------------
 		setup_topbar(window, globals()["REGISTRY"])
 		setup_navbar(window, globals()["REGISTRY"], user)
+		setup_desktop(window, globals()["REGISTRY"], user)
 	else:
 		incorrect_password_label = tk.Label(
 			window,
@@ -319,7 +320,7 @@ def compute_password(entry_name: str, window: tk.Tk):
 def get_userdata(window, user, REGISTRY):
 	try:
 		userdata_file = open(
-			f"ROOT/{REGISTRY['USERS_FOLDER']}/{user}/{REGISTRY['USERDATA_NAME']}.json",
+			f"ROOT/{REGISTRY['USERS_FOLDER']}/{globals()['user']}/{REGISTRY['USERDATA_NAME']}.json",
 			"r",
 			encoding="utf-8"
 		)
@@ -417,7 +418,6 @@ def setup_navbar(window, REGISTRY, user):
 				# If we already did the app OR it is not in the user's taskbar
 				if app.software_dir in done_apps or app.software_dir not in user_taskbar:
 					continue
-				print("Loaded", app.software_dir)
 
 				globals()["app_tkimages_" + str(iterations)] = \
 					ImageTk.PhotoImage(
@@ -453,7 +453,7 @@ def setup_navbar(window, REGISTRY, user):
 
 				if app.software_dir in startup_apps:
 					globals()["navbar_size"] = navbar_size
-					launched_app(app, app.min_size, app.max_size, None)
+					window.after(1000, launched_app, app, app.min_size, app.max_size, None)
 
 				done_apps.append(app.software_dir)
 
@@ -613,6 +613,115 @@ def setup_topbar(window, REGISTRY):
 		width = window.winfo_width() - navbar_size,
 		height = navbar_size // 4
 	)
+
+def setup_desktop(window, REGISTRY, user, lift_others:bool=False):
+	"""
+	Setups the user desktop.
+	"""
+	desktop_files = os.listdir(f"ROOT/{REGISTRY['USERS_FOLDER']}/{user}/_desktop/")
+	globals()["desktop"] = tk.Frame(window, bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]])
+
+	iterations = 0
+
+	def open_app(app, path, event):
+		launched_app(app, app.min_size, app.max_size, event)
+		app.on_file_open(path)
+
+	# Splitting the files
+	for file in desktop_files:
+		# Getting file info
+		extension_raw = file.split(".")[1]
+		if extension_raw == "png":
+			extension_raw = "paintapp"
+		displayed_extension = extension_raw.upper()
+		filename = file.split(".")[0]
+
+		for i in dir(all_softwares):
+			if i.startswith("__"):  # If it is built-in, we just ignore it
+				continue
+			# We get the attributes of the folder module
+			item = getattr(all_softwares, i)
+			# We get the real code file
+			try:
+				app = getattr(item, i)
+
+				os.chdir("ROOT/" + REGISTRY["SOFTWARES_FOLDER"] + "/"
+				         + extension_raw + "/")
+				if app.software_dir == extension_raw:
+					globals()["desktop_" + extension_raw + "_icon_" + str(iterations)] = ImageTk.PhotoImage(
+						Image.open(app.app_icon).resize((REGISTRY["NAVBAR_SIZE"], REGISTRY["NAVBAR_SIZE"]))
+					)
+					os.chdir("../../../")
+					break
+				os.chdir("../../../")
+			except AttributeError:
+				continue
+
+		# Try to import the opening program
+		try:
+			importlib.import_module("ROOT." + REGISTRY["SOFTWARES_FOLDER"] + "."
+			                        + extension_raw + "." + extension_raw)
+		except ModuleNotFoundError:
+			extension_raw = "settings"
+			importlib.import_module("ROOT." + REGISTRY["SOFTWARES_FOLDER"] + "."
+			                        + extension_raw + "." + extension_raw)
+
+		# Displaying the file on the desktop, through a grid
+		try:
+			globals()[f"desktop_{filename}_icon"] = tk.Label(
+				globals()["desktop"],
+				image = globals()["desktop_" + extension_raw + "_icon_" + str(iterations)],
+				bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
+			)
+		except KeyError:
+			globals()[f"desktop_{filename}_icon_" + str(iterations)] = tk.Label(
+				globals()["desktop"],
+				image=globals()["ACOS_Menu_icon_" + str(iterations)],
+				bg=REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
+			)
+		if "DESKTOP_FONT" not in REGISTRY:
+			ThrowBSOD(window, corrupted_key("DESKTOP_FONT"))
+		globals()[f"desktop_{filename}_label"] = tk.Label(
+			globals()["desktop"],
+			text = filename,
+			bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+			fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]],
+			font = tuple(REGISTRY["DESKTOP_FONT"])
+		)
+
+		# Binding the click to the app opening
+		path = "ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + user + "/"
+		globals()[f"desktop_{filename}_label"].bind("<Button-1>", partial(open_app, app,
+		                            remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
+		globals()[f"desktop_{filename}_icon"].bind("<Button-1>", partial(open_app, app,
+		                            remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
+
+		globals()[f"desktop_{filename}_icon"].grid(
+			row = iterations - (iterations // 4 * 4),
+			column = iterations // 4
+		)
+		globals()[f"desktop_{filename}_label"].grid(
+			row = iterations - (iterations // 4 * 4) + 1,
+			column = iterations // 4
+		)
+
+		iterations += 2
+
+	globals()["desktop"].place(
+		x = REGISTRY["NAVBAR_SIZE"],
+		y = REGISTRY["NAVBAR_SIZE"] // 4,
+		width = window.winfo_width() - REGISTRY["NAVBAR_SIZE"],
+		height = window.winfo_height() - REGISTRY["NAVBAR_SIZE"] // 4
+	)
+
+	# Lifting the other apps if the desktop has been reset
+	if lift_others is True:
+		for variable in globals():
+			if variable.startswith("frame_"):
+				try:
+					globals()[variable].lift()
+				except Exception:
+					pass
 
 def launched_app(app, min_size, max_size, event):
 	"""
@@ -1065,7 +1174,7 @@ def ACOS_Menu_click(event):
 				globals()["frame_task_manager_MAIN"],
 				text = TRANSLATIONS["ACOS_MENU"]["MemoryUsage"] + " :\n" +\
 					str(round(process.memory_info().rss / 1024 ** 2, 2))\
-					+ f"MBs ({process.memory_percent()})"
+					+ f"MBs"
 			)
 			column2.grid(row=0, column=2)
 
@@ -1333,6 +1442,9 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		json.dump(general_data, general_data_file, indent=4)
 		general_data_file.close()
 
+		# Creation of the desktop
+		os.mkdir("ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + username + f"/_desktop")
+
 		del globals()["password_salt"]
 		del globals()["password"]
 
@@ -1425,9 +1537,9 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		Validates the profile picture :
 		Copies it into the correct folder.
 		"""
-		global username
-		global pfp_path
-		global pfp_name
+		nonlocal username
+		nonlocal pfp_path
+		nonlocal pfp_name
 		if path not in (None, ""):
 			pfp_path = path
 		else:
@@ -1435,16 +1547,34 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 
 		pfp_name = pfp_path.split("/")[-1]
 		try:
+			if username == "":
+				raise Exception  # Going to the except
 			os.mkdir("ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + username + "/.userdata/")
 		except:
-			pass
+			folders_list = os.listdir("ROOT/" + REGISTRY["USERS_FOLDER"] + "/")
+			try:
+				folders_list.remove(".userdata")
+			except Exception:
+				pass
+			os.mkdir("ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + folders_list[0] + "/.userdata/")
 		try:
 			shutil.copyfile(
 				pfp_path,
 				"ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + username + "/.userdata/" + pfp_name
 			)
 		except Exception as e:
-			ThrowBSOD(window, "Unable to copy profile picture.\nError : " + str(e))
+			try:
+				folders_list = os.listdir("ROOT/" + REGISTRY["USERS_FOLDER"] + "/")
+				try:
+					folders_list.remove(".userdata")
+				except Exception:
+					pass
+				shutil.copyfile(
+					pfp_path,
+					"ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + folders_list[0] + "/.userdata/" + pfp_name
+				)
+			except Exception:
+				ThrowBSOD(window, "Unable to copy profile picture.\nError : " + str(e))
 
 		# Launches the next user creation part : The password
 		blend_tools.blend_colors_in(
@@ -1641,3 +1771,14 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 
 	window.after(3000, start_text_blend, "Let's create a new user.")
 	window.after(11000, start_text_blend, "Select a new username.", display_username_entry)
+
+def remove_suffix(variable: str, condition: bool = True, chars_amount: int = 1):
+	"""
+    Removes the suffix of a string.
+    Parameter 'variable' (str) : The text where the suffix has to be removed.
+    Parameter 'chars_amount' (int) : Default : 1. Number of chars to remove.
+    Parameter 'condition' (bool) : Default : True. Will only remove if the condition is True.
+    """
+	if condition is True:  # If the condition is respected
+		variable = variable[:-chars_amount]  # Suffix gets removed
+	return variable
