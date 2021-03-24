@@ -20,8 +20,6 @@ min_size = (800, 440)
 max_size = None
 default_size = (900, 640)
 
-
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # Fix for PyCharm hints warnings
 WindowUtils = cef.WindowUtils()
 
@@ -276,7 +274,7 @@ class LifespanHandler(object):
 
 	def OnBeforeClose(self, browser, **_):
 		logger.debug("LifespanHandler.OnBeforeClose")
-		self.tkFrame.quit()
+		#self.tkFrame.quit()
 
 class LoadHandler(object):
 

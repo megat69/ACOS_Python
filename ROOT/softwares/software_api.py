@@ -42,13 +42,13 @@ def refresh_registry():
 	REGISTRY = json.load(registry_file)
 	registry_file.close()
 
-def notify(title:str, text:str):
+def notify(title: str, text: str):
 	"""
 	Creates a notification of the user desktop.
 	"""
 	global __window
 
-	temp_text = [text[i:i+22] for i in range(0, len(text), 22)]
+	temp_text = [text[i:i + 22] for i in range(0, len(text), 22)]
 	text = ""
 	for i in range(len(temp_text)):
 		temp_text[i] += "\n"
@@ -60,14 +60,14 @@ def notify(title:str, text:str):
 	)
 	notification_title = tk.Label(
 		globals()["notification"],
-		text = title,
-		font = ("Impact", 16)
+		text=title,
+		font=("Impact", 16)
 	)
 	notification_title.pack()
 	notification_message = tk.Label(
 		globals()["notification"],
-		text = text,
-		font = ("Calibri", 12)
+		text=text,
+		font=("Calibri", 12)
 	)
 	notification_message.pack()
 
@@ -75,13 +75,13 @@ def notify(title:str, text:str):
 	width = 240
 
 	globals()["notification"].place(
-		width = width,
-		height = height,
-		x = __window.winfo_width() - 10 - width,
-		y = __window.winfo_height() - 10 - height
+		width=width,
+		height=height,
+		x=__window.winfo_width() - 10 - width,
+		y=__window.winfo_height() - 10 - height
 	)
 
-	def destroy_notification(notification:tk.Frame):
+	def destroy_notification(notification: tk.Frame):
 		notification.place_forget()
 		notification.destroy()
 
@@ -100,7 +100,6 @@ def get_all_widgets(window:tk.Frame):
 
 	return _list
 
-
 def destroy_all_widgets(window:tk.Frame):
 	"""
 	Destroys all widgets in given window.
@@ -116,35 +115,47 @@ def destroy_all_widgets(window:tk.Frame):
 				item.pack_forget()
 		item.destroy()
 
-def recreate_string(variable:(list, tuple), char_in_between:str=""):
-    """
+def recreate_string(variable: (list, tuple), char_in_between: str = ""):
+	"""
     Recreates a string from a list.
     Parameter 'variable' (list) : The list to put together to a string.
     Parameter 'char_in_between' (str) : The char to put between the elements to recompose. Nothing by default.
     """
-    temp_str = ""
-    for element in variable:
-        temp_str += str(element) + char_in_between
-    return temp_str
+	temp_str = ""
+	for element in variable:
+		temp_str += str(element) + char_in_between
+	return temp_str
 
-def remove_suffix(variable:str, condition:bool=True, chars_amount:int=1):
-    """
+def remove_suffix(variable: str, condition: bool = True, chars_amount: int = 1):
+	"""
     Removes the suffix of a string.
     Parameter 'variable' (str) : The text where the suffix has to be removed.
     Parameter 'chars_amount' (int) : Default : 1. Number of chars to remove.
     Parameter 'condition' (bool) : Default : True. Will only remove if the condition is True.
     """
-    if condition is True:  # If the condition is respected
-        variable = variable[:-chars_amount]  # Suffix gets removed
-    return variable
+	if condition is True:  # If the condition is respected
+		variable = variable[:-chars_amount]  # Suffix gets removed
+	return variable
 
-def remove_prefix(variable:str, condition:bool=True, chars_amount:int=1):
-    """
+def remove_prefix(variable: str, condition: bool = True, chars_amount: int = 1):
+	"""
         Removes the prefix of a string.
         Parameter 'variable' (str) : The text where the prefix has to be removed.
         Parameter 'chars_amount' (int) : Default : 1. Number of chars to remove.
         Parameter 'condition' (bool) : Default : True. Will only remove if the condition is True.
         """
-    if condition is True:  # If the condition is respected
-        variable = variable[chars_amount:len(variable)]  # Prefix gets removed
-    return variable
+	if condition is True:  # If the condition is respected
+		variable = variable[chars_amount:len(variable)]  # Prefix gets removed
+	return variable
+
+"""def open_file():
+	from SYSTEM_Filesystem import SYSTEM_Filesystem
+	frame = tk.Frame(
+		__window,
+		width = 500,
+		height = 400
+	)
+	path = SYSTEM_Filesystem.on_app_launch(frame, 500, 400, "open")
+	frame.place(x=0, y=0, width = 500, height = 400)
+	return path"""
+

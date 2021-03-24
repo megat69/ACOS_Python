@@ -7,6 +7,7 @@ import importlib
 import ROOT.softwares as all_softwares
 from functools import partial
 import shutil
+from main import setup_desktop
 
 app_icon = "ACOS_Folder.png"
 software_name = "Filesystem"
@@ -47,7 +48,7 @@ def get_userdata():
 
 	os.chdir("../../../")
 
-def on_app_launch(frame: tk.Frame, width: int, height: int):
+def on_app_launch(frame:tk.Frame, width:int, height:int, action:str="browse"):
 	""""
 	Function called on app launch.
 	"""
@@ -123,10 +124,12 @@ def on_app_launch(frame: tk.Frame, width: int, height: int):
 			os.chdir("../../../")
 		else:
 			extension_raw = filesystem_element.split(".")[1]
-			if extension_raw in ("png", "eps"):
+			if extension_raw == "png":
 				extension_raw = "paintapp"
 			elif extension_raw == "py":
 				extension_raw = "settings"
+			elif extension_raw == "eps":
+				continue
 
 			extension_formatted = extension_raw.upper() + " file"
 			name = filesystem_element.split(".")[0]
@@ -176,6 +179,8 @@ def on_app_launch(frame: tk.Frame, width: int, height: int):
 			else:
 				os.remove(file)
 			software_api.notify(software_name, file + " deleted.")
+			if "_desktop" in file:
+				setup_desktop(software_api.__window, software_api.REGISTRY, software_api.current_user, True)
 			# Refresh
 			change_path(path)
 
@@ -236,9 +241,14 @@ def on_app_launch(frame: tk.Frame, width: int, height: int):
 				elements[-1] = tuple(elements[-1])
 
 		def open_app(app, path, event):
-			from main import launched_app
-			launched_app(app, app.min_size, app.max_size, event)
-			app.on_file_open(path)
+			if action == "browse":
+				from main import launched_app
+				launched_app(app, app.min_size, app.max_size, event)
+				app.on_file_open(path)
+			elif action == "open":
+				return path
+			elif action == "save":
+				pass  # TODO : SAVE
 
 		if os.path.isdir(path + "/" + filesystem_element):
 			elements[-1][1].bind("<Button-1>", partial(change_path,

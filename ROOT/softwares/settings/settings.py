@@ -267,7 +267,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "Check for updates",
 		command = check_updates_launch
 	)
-	update_checker_btn.grid(row=frame.grid_size()[1], column=0, columnspan=2)
+	#update_checker_btn.grid(row=frame.grid_size()[1], column=0, columnspan=2)
 
 	def install_update_launch():
 		install_update()
@@ -350,3 +350,6 @@ def install_update():
 	software_api.notify("Update", "System needs to shutdown. Please shutdown "
 	                              "the system and manually launch the 'updater.py' script.")
 	globals()["shutdown_text"].grid(row=5, column=0, columnspan=2)
+
+def on_file_open(path):
+	pass

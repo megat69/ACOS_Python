@@ -2,6 +2,7 @@ from .. import software_api
 import tkinter as tk
 from functools import partial
 import os
+from main import setup_desktop
 
 app_icon = "ACOS_Textrock.png"
 software_name = "Textrock - Text Editor"
@@ -9,14 +10,22 @@ software_dir = "textrock"
 is_GUI = True
 min_size = None
 max_size = None
+default_size = None
 
 def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 	# Menus
 	menus_frame = tk.Frame(frame, width=width, height=round(height * 0.1))
 
+	# Where to save the file
+	globals()["save_folder_value"] = tk.StringVar()
+	globals()["save_folder_value"].set("documents/")
+
+	globals()["save_folder_dropdown"] = tk.OptionMenu(menus_frame, globals()["save_folder_value"], "documents/", "desktop/")
+	globals()["save_folder_dropdown"].grid(row=0, column=0)
+
 	# Name entry
 	globals()["name_entry"] = tk.Entry(menus_frame)
-	globals()["name_entry"].grid(row=0, column=0)
+	globals()["name_entry"].grid(row=0, column=1)
 
 	# 'Save' button
 	save_button = tk.Button(
@@ -24,7 +33,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "SAVE",
 		command = save_file
 	)
-	save_button.grid(row=0, column=1)
+	save_button.grid(row=0, column=2)
 
 	# 'Open' button
 	open_button = tk.Button(
@@ -32,7 +41,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "OPEN",
 		command = open_file
 	)
-	open_button.grid(row=0, column=2)
+	open_button.grid(row=0, column=3)
 
 	menus_frame.pack()
 
@@ -65,12 +74,12 @@ def save_file():
 	file_to_save_in = temp_name
 
 	# Test of path existence
-	if not os.path.exists("../../" + software_api.REGISTRY["USERS_FOLDER"] + "/" + software_api.current_user + "/_documents/"):
-		os.mkdir("../../" + software_api.REGISTRY["USERS_FOLDER"] + "/" + software_api.current_user + "/_documents/")
+	if not os.path.exists("../../" + software_api.REGISTRY["USERS_FOLDER"] + "/" + software_api.current_user + f"/_{globals()['save_folder_value'].get()}/"):
+		os.mkdir("../../" + software_api.REGISTRY["USERS_FOLDER"] + "/" + software_api.current_user + f"/_{globals()['save_folder_value'].get()}/")
 
 	# Opening of the file
 	file_to_save_in = open("../../" + software_api.REGISTRY["USERS_FOLDER"]\
-	    + "/" + software_api.current_user + "/_documents/" + file_to_save_in + ".textrock", "w")
+	    + "/" + software_api.current_user + f"/_{globals()['save_folder_value'].get()}/" + file_to_save_in + ".textrock", "w")
 
 	# Saving of the contents
 	file_to_save_in.write(
@@ -81,9 +90,11 @@ def save_file():
 	file_to_save_in.close()
 
 	software_api.notify(software_name, "Saved to " \
-	        +"/" + software_api.current_user + "/_documents/" + temp_name + ".textrock")
+	        +"/" + software_api.current_user + f"/_{globals()['save_folder_value'].get()}/" + temp_name + ".textrock")
 
 	os.chdir("../../../")
+
+	setup_desktop(software_api.__window, software_api.REGISTRY, software_api.current_user, True)
 
 def open_file(path:str=None):
 	"""
@@ -112,6 +123,8 @@ def open_file(path:str=None):
 	# Inserting the contents in the textbox
 	globals()["main_textbox"].delete(1.0, tk.END)
 	globals()["main_textbox"].insert(1.0, file_contents)
+	globals()["name_entry"].delete(0, tk.END)
+	globals()["name_entry"].insert(0, filename.split("/")[-1].split(".")[0])
 
 
 	software_api.notify(software_name, "Opened " \
