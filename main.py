@@ -365,7 +365,7 @@ def select_user(user, window, REGISTRY):
 
 	globals()["user"] = user
 
-def setup_navbar(window, REGISTRY, user):
+def setup_navbar(window, REGISTRY, user, open_startup_apps:bool=True):
 	"""
 	Sets the navbar up
 	"""
@@ -451,7 +451,7 @@ def setup_navbar(window, REGISTRY, user):
 
 				globals()["app_buttons_" + str(iterations)].pack(padx=5)
 
-				if app.software_dir in startup_apps:
+				if app.software_dir in startup_apps and open_startup_apps is True:
 					globals()["navbar_size"] = navbar_size
 					window.after(1000, launched_app, app, app.min_size, app.max_size, None)
 
@@ -697,12 +697,12 @@ def setup_desktop(window, REGISTRY, user, lift_others:bool=False):
 		                            remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
 
 		globals()[f"desktop_{filename}_icon"].grid(
-			row = iterations - (iterations // 4 * 4),
-			column = iterations // 4
+			row = iterations - (iterations // 8 * 8),
+			column = iterations // 8
 		)
 		globals()[f"desktop_{filename}_label"].grid(
-			row = iterations - (iterations // 4 * 4) + 1,
-			column = iterations // 4
+			row = iterations - (iterations // 8 * 8) + 1,
+			column = iterations // 8
 		)
 
 		iterations += 2
