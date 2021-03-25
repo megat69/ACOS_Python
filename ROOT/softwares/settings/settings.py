@@ -13,6 +13,7 @@ import os
 import importlib
 import ROOT.softwares as all_softwares
 from PIL import Image, ImageTk
+from main import setup_navbar
 
 app_icon = "ACOS_Settings.png"
 software_name = "Settings"
@@ -242,6 +243,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		userdata.close()
 
 		software_api.notify(software_name, "Taskbar saved !")
+		setup_navbar(software_api.__window, software_api.REGISTRY, software_api.current_user, open_startup_apps=False)
 
 
 

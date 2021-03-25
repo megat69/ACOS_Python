@@ -139,6 +139,13 @@ def treat_input(frame, params, event):
 		globals()["main_inputter"].grid(row=0, column=1, sticky="w")
 		globals()["inputter_frame"].pack(fill=tk.X)
 
+	elif user_command.lower().startswith("help"):
+		for line in """Help :
+		- 'dir' : Shows the content of the current directory.
+		- 'cd <relative path>' : Changes the current directory to the specified relative path.
+		- 'cls' : Clears the screen.""".split("\n"):
+			display(line.replace("\t", ""))
+
 	else:
 		display("Unknown command : " + user_command, color="red")
 

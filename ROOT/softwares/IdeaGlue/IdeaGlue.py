@@ -2,6 +2,7 @@ from .. import software_api
 import tkinter as tk
 import os
 from functools import partial
+from PIL import Image, ImageTk
 
 app_icon = "ACOS_IdeaGlue.png"
 software_name = "Idea glue"
@@ -33,6 +34,7 @@ def on_app_launch(frame:tk.Frame, width:int=default_size[0], height:int=default_
 
 	# Inserting the content
 	globals()["main_textarea"].insert(1.0, textarea_content)
+	globals()["main_textarea"].bind("<KeyPress>", partial(display_status_icon, frame, False))
 
 	# Placing the textarea
 	globals()["main_textarea"].place(
@@ -54,15 +56,40 @@ def on_resize(frame, event):
 		height = frame.winfo_height()
 	)
 
-def save_content(frame:tk.Tk):
+def display_status_icon(frame, saved:bool=True, event=None):
+	os.chdir(os.path.dirname(os.path.realpath(__file__)))
+	icon_size = 16
+
+	globals()["status_icon_TkImage"] = ImageTk.PhotoImage(
+		Image.open(
+			("Not" if saved is False else "") + "Saved.png"
+		).resize((icon_size, icon_size))
+	)
+	globals()["status_icon"] = tk.Label(
+		frame,
+		image = globals()["status_icon_TkImage"],
+		bg = "#d8ad02"
+	)
+	globals()["status_icon"].place(
+		x = frame.winfo_width() - icon_size,
+		y = frame.winfo_height() - icon_size
+	)
+	globals()["status_icon"].bind("<Button-1>", partial(save_content, frame))
+
+	os.chdir("../../../")
+
+
+def save_content(frame:tk.Tk, event=None):
 	"""
 	Function to save the textarea content
 	"""
 
 	textarea_file = open("ROOT/" + software_api.REGISTRY["USERS_FOLDER"] + "/" \
 	                     + software_api.current_user + "/.ideaglue_content", "w")
-	textarea_file.write(globals()["main_textarea"].get(1.0, tk.END))
+	textarea_file.write(globals()["main_textarea"].get(1.0, tk.END)[:-1])
 	textarea_file.close()
+
+	display_status_icon(frame, True)
 
 	frame.after(3000, save_content, frame)
 	
