@@ -64,13 +64,19 @@ def get_zip_link(username:str, repository:str, branch:str="main"):
 	"""
 	return f"https://github.com/{username}/{repository}/archive/refs/heads/{branch}.zip"
 
-def move_files(source_dir:str, target_dir:str):
-	for filename in os.listdir(source_dir):
-		shutil.move(os.path.join(source_dir, filename), os.path.join(target_dir, filename))
-
-#HEY I'M NEW :D
+def move_files(source_dir:str):
+	for filename in os.listdir("_"):
+		try:  # Folder
+			shutil.rmtree(filename)
+		except NotADirectoryError:  # File
+			os.remove(filename)
+		except PermissionError:
+			continue
+		shutil.move(os.path.join(source_dir, filename), filename)
 
 if __name__ == "__main__":
 	download_repo(get_zip_link("megat69", "ACOS"), "", (".gitattributes", "README.md", "LICENSE"))
-	move_files("_/", "")
+	print("Replacing files...")
+	move_files("_/")
 	shutil.rmtree("_/")
+	print("Update applied done !")
