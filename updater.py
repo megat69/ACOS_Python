@@ -66,9 +66,11 @@ def get_zip_link(username:str, repository:str, branch:str="main"):
 
 def move_files(source_dir:str):
 	for filename in os.listdir("_"):
+		print(os.path.join(source_dir, filename), filename)
 		try:  # Folder
-			if not "softwares" in filename and not "ROOT" in filename:
-				shutil.rmtree(filename)
+			if "ROOT" in filename:
+				continue
+			shutil.rmtree(filename)
 		except NotADirectoryError:  # File
 			os.remove(filename)
 		except PermissionError:
