@@ -3,6 +3,7 @@ A bunch of APIs for the ACOS sotwares.
 """
 import json
 import tkinter as tk
+import requests
 
 # os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # os.chdir("../../../")
@@ -148,14 +149,11 @@ def remove_prefix(variable: str, condition: bool = True, chars_amount: int = 1):
 		variable = variable[chars_amount:len(variable)]  # Prefix gets removed
 	return variable
 
-"""def open_file():
-	from SYSTEM_Filesystem import SYSTEM_Filesystem
-	frame = tk.Frame(
-		__window,
-		width = 500,
-		height = 400
-	)
-	path = SYSTEM_Filesystem.on_app_launch(frame, 500, 400, "open")
-	frame.place(x=0, y=0, width = 500, height = 400)
-	return path"""
-
+def test_connection():
+	url = "http://www.google.com"
+	timeout = 5
+	try:
+		request = requests.get(url, timeout=timeout)
+		return True
+	except (requests.ConnectionError, requests.Timeout):
+		return False

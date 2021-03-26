@@ -1,4 +1,3 @@
-from .. import software_api
 from cefpython3 import cefpython as cef
 import ctypes
 
@@ -10,15 +9,6 @@ import sys
 import os
 import platform
 import logging as _logging
-import requests
-
-app_icon = "ACOS_Micron.png"
-software_name = "Micr0n"
-software_dir = "Micr0n"
-is_GUI = True
-min_size = (800, 440)
-max_size = None
-default_size = (900, 640)
 
 # Fix for PyCharm hints warnings
 WindowUtils = cef.WindowUtils()
@@ -35,53 +25,27 @@ logger = _logging.getLogger("tkinter_.py")
 # Tk 8.5 doesn't support png images
 IMAGE_EXT = ".png" if tk.TkVersion > 8.5 else ".gif"
 
-def on_app_launch(frame:tk.Frame, width:int=900, height:int=640):
-	# Testing if connection
-	if software_api.test_connection() is True:
-		if "no_connection_title" in globals():
-			globals()["no_connection_title"].pack_forget()
-			globals()["no_connection_title"].destroy()
-			globals()["no_connection_subtitle"].pack_forget()
-			globals()["no_connection_subtitle"].destroy()
-
-		logger.setLevel(_logging.CRITICAL)
-		stream_handler = _logging.StreamHandler()
-		formatter = _logging.Formatter("[%(filename)s] %(message)s")
-		stream_handler.setFormatter(formatter)
-		logger.addHandler(stream_handler)
-		logger.info("CEF Python {ver}".format(ver=cef.__version__))
-		logger.info("Python {ver} {arch}".format(
-			ver=platform.python_version(), arch=platform.architecture()[0]))
-		logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
-		assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
-		sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
-		# Tk must be initialized before CEF otherwise fatal error (Issue #306)
-		app = MainFrame(frame)
-		settings = {}
-		if MAC:
-			settings["external_message_pump"] = True
-		cef.Initialize(settings=settings)
-	else:
-		if not "no_connection_title" in globals():
-			globals()["no_connection_title"] = tk.Label(
-				frame,
-				text = "Oh No !",
-				font = ("Impact", 22)
-			)
-			globals()["no_connection_title"].pack()
-			globals()["no_connection_subtitle"] = tk.Label(
-				frame,
-				text = "Sounds like no connection is available...",
-				font = ("Impact", 14)
-			)
-			globals()["no_connection_subtitle"].pack()
-		# Testing again
-		frame.after(5000, on_app_launch, frame, width, height)
+def launch(frame, URL, **settings):
+	logger.setLevel(_logging.CRITICAL)
+	stream_handler = _logging.StreamHandler()
+	formatter = _logging.Formatter("[%(filename)s] %(message)s")
+	stream_handler.setFormatter(formatter)
+	logger.addHandler(stream_handler)
+	logger.info("CEF Python {ver}".format(ver=cef.__version__))
+	logger.info("Python {ver} {arch}".format(
+		ver=platform.python_version(), arch=platform.architecture()[0]))
+	logger.info("Tk {ver}".format(ver=tk.Tcl().eval('info patchlevel')))
+	assert cef.__version__ >= "55.3", "CEF Python v55.3+ required to run this"
+	sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+	# Tk must be initialized before CEF otherwise fatal error (Issue #306)
+	app = MainFrame(frame, URL)
+	if MAC:
+		settings["external_message_pump"] = True
+	cef.Initialize(settings=settings)
 
 class MainFrame(tk.Frame):
-	def __init__(self, frame):
+	def __init__(self, frame, URL):
 		self.browser_frame = None
-		self.navigation_bar = None
 		self.frame = frame
 
 		# Root
@@ -96,15 +60,8 @@ class MainFrame(tk.Frame):
 		self.bind("<FocusIn>", self.on_focus_in)
 		self.bind("<FocusOut>", self.on_focus_out)
 
-		# NavigationBar
-		self.navigation_bar = NavigationBar(self)
-		self.navigation_bar.grid(row=0, column=0,
-		                         sticky=(tk.N + tk.S + tk.E + tk.W))
-		tk.Grid.rowconfigure(self, 0, weight=0)
-		tk.Grid.columnconfigure(self, 0, weight=0)
-
 		# BrowserFrame
-		self.browser_frame = BrowserFrame(self, self.navigation_bar)
+		self.browser_frame = BrowserFrame(self, None, URL)
 		self.browser_frame.grid(row=1, column=0,
 		                        sticky=(tk.N + tk.S + tk.E + tk.W))
 		tk.Grid.rowconfigure(self, 1, weight=1)
@@ -123,8 +80,6 @@ class MainFrame(tk.Frame):
 		if self.browser_frame:
 			width = event.width
 			height = event.height
-			if self.navigation_bar:
-				height = height - self.navigation_bar.winfo_height()
 			self.browser_frame.on_mainframe_configure(width, height)
 
 	def on_focus_in(self, _):
@@ -153,8 +108,9 @@ class MainFrame(tk.Frame):
 
 class BrowserFrame(tk.Frame):
 
-	def __init__(self, mainframe, navigation_bar=None):
+	def __init__(self, mainframe, navigation_bar=None, URL="https://google.com"):
 		self.navigation_bar = navigation_bar
+		self.URL = URL
 		self.closing = False
 		self.browser = None
 		tk.Frame.__init__(self, mainframe)
@@ -169,8 +125,7 @@ class BrowserFrame(tk.Frame):
 		window_info = cef.WindowInfo()
 		rect = [0, 0, self.winfo_width(), self.winfo_height()]
 		window_info.SetAsChild(self.get_window_handle(), rect)
-		self.browser = cef.CreateBrowserSync(window_info,
-		                                     url="https://www.google.com/")
+		self.browser = cef.CreateBrowserSync(window_info,  url=self.URL)
 		assert self.browser
 		self.browser.SetClientHandler(LifespanHandler(self))
 		self.browser.SetClientHandler(LoadHandler(self))
@@ -273,8 +228,7 @@ class LoadHandler(object):
 		self.browser_frame = browser_frame
 
 	def OnLoadStart(self, browser, **_):
-		if self.browser_frame.master.navigation_bar:
-			self.browser_frame.master.navigation_bar.set_url(browser.GetUrl())
+		pass
 
 class FocusHandler(object):
 	"""For focus problems see Issue #255 and Issue #535. """
@@ -299,107 +253,3 @@ class FocusHandler(object):
 		if LINUX:
 			self.browser_frame.focus_set()
 
-class NavigationBar(tk.Frame):
-
-	def __init__(self, master):
-		self.back_state = tk.NONE
-		self.forward_state = tk.NONE
-		self.back_image = None
-		self.forward_image = None
-		self.reload_image = None
-
-		tk.Frame.__init__(self, master)
-		resources = os.path.join(os.path.dirname(__file__), "resources")
-
-		# Back button
-		back_png = os.path.join(resources, "back" + IMAGE_EXT)
-		self.back_button = tk.Button(self, text="<-",
-		                             command=self.go_back)
-		self.back_button.grid(row=0, column=0)
-
-		# Forward button
-		forward_png = os.path.join(resources, "forward" + IMAGE_EXT)
-		self.forward_button = tk.Button(self, text="->",
-		                                command=self.go_forward)
-		self.forward_button.grid(row=0, column=1)
-
-		# Reload button
-		reload_png = os.path.join(resources, "reload" + IMAGE_EXT)
-		self.reload_button = tk.Button(self, text="REFRESH",
-		                               command=self.reload)
-		self.reload_button.grid(row=0, column=2)
-
-		# Url entry
-		self.url_entry = tk.Entry(self)
-		self.url_entry.bind("<FocusIn>", self.on_url_focus_in)
-		self.url_entry.bind("<FocusOut>", self.on_url_focus_out)
-		self.url_entry.bind("<Return>", self.on_load_url)
-		self.url_entry.bind("<Button-1>", self.on_button1)
-		self.url_entry.grid(row=0, column=3,
-		                    sticky=(tk.N + tk.S + tk.E + tk.W))
-		tk.Grid.rowconfigure(self, 0, weight=100)
-		tk.Grid.columnconfigure(self, 3, weight=100)
-
-		# Update state of buttons
-		self.update_state()
-
-	def go_back(self):
-		if self.master.get_browser():
-			self.master.get_browser().GoBack()
-
-	def go_forward(self):
-		if self.master.get_browser():
-			self.master.get_browser().GoForward()
-
-	def reload(self):
-		if self.master.get_browser():
-			self.master.get_browser().Reload()
-
-	def set_url(self, url):
-		self.url_entry.delete(0, tk.END)
-		self.url_entry.insert(0, url)
-
-	def on_url_focus_in(self, _):
-		logger.debug("NavigationBar.on_url_focus_in")
-
-	def on_url_focus_out(self, _):
-		logger.debug("NavigationBar.on_url_focus_out")
-
-	def on_load_url(self, _):
-		if self.master.get_browser():
-			self.master.get_browser().StopLoad()
-			self.master.get_browser().LoadUrl(self.url_entry.get())
-
-	def on_button1(self, _):
-		"""For focus problems see Issue #255 and Issue #535. """
-		logger.debug("NavigationBar.on_button1")
-		self.master.master.focus_force()
-
-	def update_state(self):
-		browser = self.master.get_browser()
-		if not browser:
-			if self.back_state != tk.DISABLED:
-				self.back_button.config(state=tk.DISABLED)
-				self.back_state = tk.DISABLED
-			if self.forward_state != tk.DISABLED:
-				self.forward_button.config(state=tk.DISABLED)
-				self.forward_state = tk.DISABLED
-			self.after(100, self.update_state)
-			return
-		if browser.CanGoBack():
-			if self.back_state != tk.NORMAL:
-				self.back_button.config(state=tk.NORMAL)
-				self.back_state = tk.NORMAL
-		else:
-			if self.back_state != tk.DISABLED:
-				self.back_button.config(state=tk.DISABLED)
-				self.back_state = tk.DISABLED
-		if browser.CanGoForward():
-			if self.forward_state != tk.NORMAL:
-				self.forward_button.config(state=tk.NORMAL)
-				self.forward_state = tk.NORMAL
-		else:
-			if self.forward_state != tk.DISABLED:
-				self.forward_button.config(state=tk.DISABLED)
-				self.forward_state = tk.DISABLED
-		self.after(100, self.update_state)
