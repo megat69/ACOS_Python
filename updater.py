@@ -1,6 +1,8 @@
 """
 Updater script for ACOS.
 """
+import json
+
 import requests
 import os
 import zipfile
@@ -74,7 +76,24 @@ def move_files(source_dir:str):
 			os.remove(filename)
 		except PermissionError:
 			continue
-		shutil.move(os.path.join(source_dir, filename), filename)
+		if filename is not "registry.json":
+			shutil.move(os.path.join(source_dir, filename), filename)
+		else:
+			f = open("registry.json", "r")
+			registry = json.load(f)
+			f.close()
+			f = open("_/registry.json", "r")
+			new_registry = json.load(f)
+			f.close()
+
+			for key in new_registry:
+				if key not in registry:
+					registry[key] = new_registry[key]
+
+			f = open("registry.json", "w")
+			json.dump(registry, f, indent=4)
+			f.close()
+
 
 if __name__ == "__main__":
 	download_repo(get_zip_link("megat69", "ACOS"), "", (".gitattributes", "README.md", "LICENSE"))

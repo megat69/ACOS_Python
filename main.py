@@ -118,7 +118,7 @@ def destroy_all_widgets(window: tk.Tk):
 
 def corrupted_key(key, general_data: bool = False):
 	return TRANSLATIONS["BSOD"]["CorruptedKey"].format(key=key) + \
-		("\n" + TRANSLATIONS["BSOD"]["GeneralDataKey"] if general_data is True else "")
+	       ("\n" + TRANSLATIONS["BSOD"]["GeneralDataKey"] if general_data is True else "")
 
 def start_OS(window: tk.Tk, REGISTRY: dict):
 	"""
@@ -281,13 +281,13 @@ def compute_password(entry_name: str, window: tk.Tk):
 
 	# Checks the password
 	if hash_utility.check_password(
-		given_pass,
-		"json",
-		file=f"ROOT/"
-		    f"{globals()['REGISTRY']['USERS_FOLDER']}/"
-		    f"{user}/"
-		    f".userdata.json",
-		key="PASSWORD"
+			given_pass,
+			"json",
+			file=f"ROOT/"
+			     f"{globals()['REGISTRY']['USERS_FOLDER']}/"
+			     f"{user}/"
+			     f".userdata.json",
+			key="PASSWORD"
 	):
 		# Destroying all widgets
 		destroy_all_widgets(window)
@@ -313,7 +313,7 @@ def compute_password(entry_name: str, window: tk.Tk):
 		)
 		incorrect_password_label.place(
 			x=window.winfo_width() // 2 \
-				- len(globals()["TRANSLATIONS"]["LOGIN"]["IncorrectPassword"]),
+			  - len(globals()["TRANSLATIONS"]["LOGIN"]["IncorrectPassword"]),
 			y=window.winfo_height() // 2 + 96
 		)
 
@@ -365,7 +365,7 @@ def select_user(user, window, REGISTRY):
 
 	globals()["user"] = user
 
-def setup_navbar(window, REGISTRY, user, open_startup_apps:bool=True):
+def setup_navbar(window, REGISTRY, user, open_startup_apps: bool = True):
 	"""
 	Sets the navbar up
 	"""
@@ -526,7 +526,7 @@ def setup_topbar(window, REGISTRY):
 	# Create the frame
 	globals()["topbar_frame"] = tk.Frame(
 		window,
-		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
+		bg=REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
 	)
 
 	try:
@@ -553,53 +553,58 @@ def setup_topbar(window, REGISTRY):
 	# Placing the date and time
 	globals()["topbar_datetime"] = tk.Label(
 		globals()["topbar_frame"],
-		text = get_date(),
-		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
-		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+		text=get_date(),
+		bg=REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg=REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
 	)
 	globals()["topbar_datetime"].pack(side=tk.RIGHT)
 
 	# Making it update
 	window.after(1000, set_date_loop)
 
-	"""# Sound
-	def get_volume():
-		# https://stackoverflow.com/questions/20828752/python-change-master-application-volume
-		sessions = AudioUtilities.GetAllSessions()
-		for session in sessions:
-			volume = session._ctl.QueryInterface(ISimpleAudioVolume)
-			if session.Process and session.Process.name() == "vlc.exe":
-				print(volume.GetMasterVolume())
-				return volume.GetMasterVolume()
-
-	def update_volume():
-		globals()["topbar_volume"].config(text=str(get_volume()))
-		window.after(4000, update_volume)
-
-	globals()["topbar_volume"] = tk.Label(
-		globals()["topbar_frame"],
-		text = str(get_volume()),
-		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
-		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
-	)
-	globals()["topbar_volume"].pack(side=tk.RIGHT, padx=topbar_spacing)"""
-
 	# Battery displaying
 	def get_battery_string():
 		battery = psutil.sensors_battery()
 		return f"{battery.percent}%{', Charging' if battery.power_plugged else ''}"
-	
+
 	def set_battery_string():
 		globals()["topbar_battery_status"].config(text=get_battery_string())
 		window.after(10000, set_battery_string)
 
 	globals()["topbar_battery_status"] = tk.Label(
 		globals()["topbar_frame"],
-		text = get_battery_string(),
-		bg = REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
-		fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+		text=get_battery_string(),
+		bg=REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg=REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
 	)
 	globals()["topbar_battery_status"].pack(side=tk.RIGHT, padx=topbar_spacing)
+
+	# Disabled display for processor and RAM usage
+	"""# Processor displaying
+	def set_processor_string():
+		globals()["topbar_processor_status"].config(text=psutil.cpu_percent())
+		window.after(10000, set_processor_string)
+
+	globals()["topbar_processor_status"] = tk.Label(
+		globals()["topbar_frame"],
+		text=psutil.cpu_percent(),
+		bg=REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg=REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+	globals()["topbar_processor_status"].pack(side=tk.RIGHT, padx=topbar_spacing)
+
+	# RAM Usage
+	def set_RAM_string():
+		globals()["topbar_RAM_status"].config(text=psutil.Process(os.getpid()).memory_info().rss)
+		window.after(10000, set_RAM_string)
+
+	globals()["topbar_RAM_status"] = tk.Label(
+		globals()["topbar_frame"],
+		text=psutil.Process(os.getpid()).memory_info().rss,
+		bg=REGISTRY["NAVBAR_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+		fg=REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]]
+	)
+	globals()["topbar_RAM_status"].pack(side=tk.RIGHT, padx=topbar_spacing)"""
 
 	# Finally placing the topbar
 	try:
@@ -608,18 +613,18 @@ def setup_topbar(window, REGISTRY):
 		ThrowBSOD(window, corrupted_key("TOPBAR_POSITION_ON_TOP"))
 
 	globals()["topbar_frame"].place(
-		x = navbar_size,
-		y = 0 if topbar_position is True else window.winfo_height() - (navbar_size // 4),
-		width = window.winfo_width() - navbar_size,
-		height = navbar_size // 4
+		x=navbar_size,
+		y=0 if topbar_position is True else window.winfo_height() - (navbar_size // 4),
+		width=window.winfo_width() - navbar_size,
+		height=navbar_size // 4
 	)
 
-def setup_desktop(window, REGISTRY, user, lift_others:bool=False):
+def setup_desktop(window, REGISTRY, user, lift_others: bool = False):
 	"""
 	Setups the user desktop.
 	"""
 	desktop_files = os.listdir(f"ROOT/{REGISTRY['USERS_FOLDER']}/{user}/_desktop/")
-	globals()["desktop"] = tk.Frame(window, bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]])
+	globals()["desktop"] = tk.Frame(window, bg=REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]])
 
 	iterations = 0
 
@@ -670,8 +675,8 @@ def setup_desktop(window, REGISTRY, user, lift_others:bool=False):
 		try:
 			globals()[f"desktop_{filename}_icon"] = tk.Label(
 				globals()["desktop"],
-				image = globals()["desktop_" + extension_raw + "_icon_" + str(iterations)],
-				bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
+				image=globals()["desktop_" + extension_raw + "_icon_" + str(iterations)],
+				bg=REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]]
 			)
 		except KeyError:
 			globals()[f"desktop_{filename}_icon_" + str(iterations)] = tk.Label(
@@ -683,35 +688,35 @@ def setup_desktop(window, REGISTRY, user, lift_others:bool=False):
 			ThrowBSOD(window, corrupted_key("DESKTOP_FONT"))
 		globals()[f"desktop_{filename}_label"] = tk.Label(
 			globals()["desktop"],
-			text = filename,
-			bg = REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
-			fg = REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]],
-			font = tuple(REGISTRY["DESKTOP_FONT"])
+			text=filename,
+			bg=REGISTRY["MAIN_BG_COLOR"][REGISTRY["CURRENT_THEME"]],
+			fg=REGISTRY["MAIN_FG_COLOR"][REGISTRY["CURRENT_THEME"]],
+			font=tuple(REGISTRY["DESKTOP_FONT"])
 		)
 
 		# Binding the click to the app opening
 		path = "ROOT/" + REGISTRY["USERS_FOLDER"] + "/" + user + "/"
 		globals()[f"desktop_{filename}_label"].bind("<Button-1>", partial(open_app, app,
-		                            remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
+		                                                                  remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
 		globals()[f"desktop_{filename}_icon"].bind("<Button-1>", partial(open_app, app,
-		                            remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
+		                                                                 remove_suffix(path, path.endswith("/")) + "/_desktop/" + file))
 
 		globals()[f"desktop_{filename}_icon"].grid(
-			row = iterations - (iterations // 8 * 8),
-			column = iterations // 8
+			row=iterations - (iterations // 8 * 8),
+			column=iterations // 8
 		)
 		globals()[f"desktop_{filename}_label"].grid(
-			row = iterations - (iterations // 8 * 8) + 1,
-			column = iterations // 8
+			row=iterations - (iterations // 8 * 8) + 1,
+			column=iterations // 8
 		)
 
 		iterations += 2
 
 	globals()["desktop"].place(
-		x = REGISTRY["NAVBAR_SIZE"],
-		y = REGISTRY["NAVBAR_SIZE"] // 4,
-		width = window.winfo_width() - REGISTRY["NAVBAR_SIZE"],
-		height = window.winfo_height() - REGISTRY["NAVBAR_SIZE"] // 4
+		x=REGISTRY["NAVBAR_SIZE"],
+		y=REGISTRY["NAVBAR_SIZE"] // 4,
+		width=window.winfo_width() - REGISTRY["NAVBAR_SIZE"],
+		height=window.winfo_height() - REGISTRY["NAVBAR_SIZE"] // 4
 	)
 
 	# Lifting the other apps if the desktop has been reset
@@ -757,7 +762,7 @@ def launched_app(app, min_size, max_size, event):
 			globals()["navbar_size"],
 			round(globals()["navbar_size"] + globals()["REGISTRY"]["WIN_HEIGHT"] * 0.25)
 		)
-	)
+		)
 
 	def Drag(event):
 		"""
@@ -767,8 +772,8 @@ def launched_app(app, min_size, max_size, event):
 		y = event.y + (globals()[f"frame_{app.software_dir}_{instance}"].winfo_height() // 2)
 
 		if isclose(globals()[f"{app.software_dir}_{instance}_last_coords"][0],
-		           x, rel_tol=5) and isclose(globals()[f"{app.software_dir}_{instance}_last_coords"][1],
-		                                     y, rel_tol=5):
+			x, rel_tol=5) and isclose(globals()[f"{app.software_dir}_{instance}_last_coords"][1],
+			y, rel_tol=5):
 
 			globals()[f"frame_{app.software_dir}_{instance}"].place(
 				x=x,
@@ -819,6 +824,48 @@ def launched_app(app, min_size, max_size, event):
 		globals()[f"frame_{app.software_dir}_{instance}"].place_forget()
 		globals()[f"frame_{app.software_dir}_{instance}"].destroy()
 
+	def expand_app(app, software_dir):
+		"""
+		Expands the app.
+		"""
+		nonlocal parent_width
+		nonlocal parent_height
+		parent_width = window.winfo_width() - globals()["REGISTRY"]["NAVBAR_SIZE"]
+		parent_height = window.winfo_height() - globals()["REGISTRY"]["NAVBAR_SIZE"] // 4
+		globals()[app].place(
+			x=globals()["REGISTRY"]["NAVBAR_SIZE"],
+			y=globals()["REGISTRY"]["NAVBAR_SIZE"] // 4,
+			width=parent_width,
+			height=parent_height
+		)
+		globals()[app + "_MAIN"].place(
+			x=4,
+			y=icon_size + 4,
+			width=parent_width - 8,
+			height=parent_height - icon_size - 8
+		)
+		globals()[f"frame_{software_dir}_{instance}_resizeable_frame"].place(
+			x=parent_width - 8,
+			y=parent_height - 8,
+			width=8,
+			height=8
+		)
+		quit_button.place(
+			x=parent_width - icon_size - 2,
+			y=2,
+			height=icon_size,
+			width=icon_size
+		)
+		try:
+			expand_button.place(
+				x=parent_width - icon_size * 2 - 4,
+				y=4,
+				height=icon_size,
+				width=icon_size
+			)
+		except:
+			pass
+
 	# Creates the width of the app frame
 	if app.default_size is None:
 		parent_width = randint(
@@ -847,6 +894,10 @@ def launched_app(app, min_size, max_size, event):
 	globals()["quit_icon_" + str(opened_apps_amount)] = ImageTk.PhotoImage(
 		Image.open("assets/ACOS_Bin.png").resize((16, 16))
 	)
+	# Expand icon
+	globals()["expand_icon_" + str(opened_apps_amount)] = ImageTk.PhotoImage(
+		Image.open("assets/ACOS_Expand.png").resize((16, 16))
+	)
 
 	# Creates the quit button
 	quit_button = tk.Button(
@@ -863,6 +914,23 @@ def launched_app(app, min_size, max_size, event):
 		height=icon_size,
 		width=icon_size
 	)
+
+	# Creates the expand button
+	if app.max_size is None:
+		expand_button = tk.Button(
+			globals()[f"frame_{app.software_dir}_{instance}"],
+			image=globals()["expand_icon_" + str(opened_apps_amount)],
+			borderwidth=0,
+			command=partial(expand_app, f"frame_{app.software_dir}_{instance}", app.software_dir),
+			bg=background_color,
+			activebackground=background_color
+		)
+		expand_button.place(
+			x=parent_width - icon_size * 2 - 4,
+			y=4,
+			height=icon_size,
+			width=icon_size
+		)
 
 	# Creates a new MAIN frame inside the app frame
 	globals()[f"frame_{app.software_dir}_{instance}_MAIN"] = tk.Frame(
@@ -897,36 +965,42 @@ def launched_app(app, min_size, max_size, event):
 		if minsize is None or maxsize is None or not (event.y + parent_height > maxsize[1] or event.y + parent_height < minsize[1]):
 			parent_height = event.y + parent_height
 		globals()[f"frame_{app.software_dir}_{instance}"].place(
-			x = globals()[f"{app.software_dir}_{instance}_last_coords"][0],
-			y = globals()[f"{app.software_dir}_{instance}_last_coords"][1],
-			width = parent_width,
-			height = parent_height
+			x=globals()[f"{app.software_dir}_{instance}_last_coords"][0],
+			y=globals()[f"{app.software_dir}_{instance}_last_coords"][1],
+			width=parent_width,
+			height=parent_height
 		)
 		globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].place(
-			x = parent_width - 8,
-			y = parent_height - 8,
-			width = 8,
-			height = 8
+			x=parent_width - 8,
+			y=parent_height - 8,
+			width=8,
+			height=8
 		)
 		globals()[f"frame_{app.software_dir}_{instance}_MAIN"].place(
-			x = 4,
-			y = icon_size + 4,
-			width = parent_width - 8,
-			height = parent_height - icon_size - 8
+			x=4,
+			y=icon_size + 4,
+			width=parent_width - 8,
+			height=parent_height - icon_size - 8
 		)
 		quit_button.place(
-			x = parent_width - icon_size - 2,
-			y = 2,
-			height = icon_size,
-			width = icon_size
+			x=parent_width - icon_size - 2,
+			y=2,
+			height=icon_size,
+			width=icon_size
+		)
+		expand_button.place(
+			x=parent_width - icon_size * 2 - 4,
+			y=4,
+			height=icon_size,
+			width=icon_size
 		)
 
 	globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].bind("<B1-Motion>", partial(Resize, app.min_size, app.max_size))
 	globals()[f"frame_{app.software_dir}_{instance}_resizeable_frame"].place(
-		x = parent_width - 8,
-		y = parent_height - 8,
-		width = 8,
-		height = 8
+		x=parent_width - 8,
+		y=parent_height - 8,
+		width=8,
+		height=8
 	)
 
 	# Finally places the MAIN frame in the software one
@@ -993,7 +1067,7 @@ def ACOS_Menu_click(event):
 					globals()["navbar_size"],
 					round(globals()["navbar_size"] + globals()["REGISTRY"]["WIN_HEIGHT"] * 0.25)
 				)
-			)
+				)
 
 			def Drag(event):
 				"""
@@ -1003,8 +1077,8 @@ def ACOS_Menu_click(event):
 				y = event.y + (globals()["frame_task_manager"].winfo_height() // 2)
 
 				if isclose(globals()["frame_task_manager_last_coords"][0],
-		            x, rel_tol=5) and isclose(globals()["frame_task_manager_last_coords"][1],
-                     y, rel_tol=5):
+				           x, rel_tol=5) and isclose(globals()["frame_task_manager_last_coords"][1],
+				                                     y, rel_tol=5):
 
 					globals()["frame_task_manager"].place(
 						x=x,
@@ -1060,7 +1134,6 @@ def ACOS_Menu_click(event):
 					task.destroy()
 				for btn in task_kill_buttons:
 					btn.destroy()
-
 
 			# Creates the width of the app frame
 			parent_width = randint(
@@ -1157,8 +1230,8 @@ def ACOS_Menu_click(event):
 			# Columns indications
 			column0 = tk.Label(
 				globals()["frame_task_manager_MAIN"],
-				text = TRANSLATIONS["ACOS_MENU"]["TaskName"],
-				font = ("Impact", 12)
+				text=TRANSLATIONS["ACOS_MENU"]["TaskName"],
+				font=("Impact", 12)
 			)
 			column0.grid(row=0, column=0)
 
@@ -1166,23 +1239,23 @@ def ACOS_Menu_click(event):
 
 			column1 = tk.Label(
 				globals()["frame_task_manager_MAIN"],
-				text = TRANSLATIONS["ACOS_MENU"]["ProcessorUsage"] + " :\n" + str(process.cpu_percent()) + "%"
+				text=TRANSLATIONS["ACOS_MENU"]["ProcessorUsage"] + " :\n" + str(process.cpu_percent()) + "%"
 			)
 			column1.grid(row=0, column=1)
 
 			column2 = tk.Label(
 				globals()["frame_task_manager_MAIN"],
-				text = TRANSLATIONS["ACOS_MENU"]["MemoryUsage"] + " :\n" +\
-					str(round(process.memory_info().rss / 1024 ** 2, 2))\
-					+ f"MBs"
+				text=TRANSLATIONS["ACOS_MENU"]["MemoryUsage"] + " :\n" + \
+				     str(round(process.memory_info().rss / 1024 ** 2, 2)) \
+				     + f"MBs"
 			)
 			column2.grid(row=0, column=2)
 
 			# TODO : Scrollbar
 
-
 			tasks = []
 			task_kill_buttons = []
+
 			def task_manager_code():
 				nonlocal tasks
 				nonlocal task_kill_buttons
@@ -1223,6 +1296,7 @@ def ACOS_Menu_click(event):
 							row=len(tasks),
 							column=1
 						)
+
 			task_manager_code()
 
 			# Finally places the MAIN frame in the software one
@@ -1236,8 +1310,8 @@ def ACOS_Menu_click(event):
 		# ------------------ FRAME ELEMENTS ------------------
 		btn_params = {
 			"font": ("Arial", 16),
-            "bg": "#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],
-            "fg": globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
+			"bg": "#f0f0f0" if globals()["current_theme"] == "light" else globals()["REGISTRY"]["MAIN_BG_COLOR"]["light-dark"],
+			"fg": globals()["REGISTRY"]["MAIN_FG_COLOR"][globals()["current_theme"]]
 		}
 
 		button_close_all = tk.Button(
@@ -1255,33 +1329,33 @@ def ACOS_Menu_click(event):
 		# Task manager
 		task_manager_button = tk.Button(
 			globals()["menu_frame_MAIN"],
-			text = TRANSLATIONS["ACOS_MENU"]["TaskManager"],
-			command = launch_task_manager,
+			text=TRANSLATIONS["ACOS_MENU"]["TaskManager"],
+			command=launch_task_manager,
 			**btn_params
 		)
 		task_manager_button.grid(
-			row = 1,
-			column = 0
+			row=1,
+			column=0
 		)
 
 		apps_canvas = tk.Canvas(
 			globals()["menu_frame_MAIN"],
-			width = globals()["menu_frame"].winfo_width(),
-			height = round(globals()["menu_frame"].winfo_height() * 0.8),
-			bg = btn_params["bg"]
+			width=globals()["menu_frame"].winfo_width(),
+			height=round(globals()["menu_frame"].winfo_height() * 0.8),
+			bg=btn_params["bg"]
 		)
 
 		scrollbar = tk.Scrollbar(
 			apps_canvas
 		)
 		scrollbar.pack(
-			side = tk.RIGHT,
-			fill = tk.Y
+			side=tk.RIGHT,
+			fill=tk.Y
 		)
 		apps_frame = tk.Canvas(
 			apps_canvas,
-			yscrollcommand = scrollbar.set,
-			bg = btn_params["bg"]
+			yscrollcommand=scrollbar.set,
+			bg=btn_params["bg"]
 		)
 
 		# Adding the apps inside
@@ -1310,10 +1384,10 @@ def ACOS_Menu_click(event):
 					# If we already did the app OR it is not in the user's taskbar
 					if app.software_dir in done_apps:
 						continue
-					
+
 					globals()["MENU_app_buttons_" + str(iterations) + "_NAME"] = tk.Label(
 						apps_canvas,
-						text = app.software_name,
+						text=app.software_name,
 						**btn_params
 					)
 					globals()["MENU_app_buttons_" + str(iterations) + "_NAME"].pack()
@@ -1333,17 +1407,16 @@ def ACOS_Menu_click(event):
 					print(e)
 
 		apps_frame.pack(
-			side = tk.LEFT,
-			fill = tk.BOTH
+			side=tk.LEFT,
+			fill=tk.BOTH
 		)
-		scrollbar.config(command = apps_frame.yview)
-
+		scrollbar.config(command=apps_frame.yview)
 
 		apps_canvas.grid(
-			row = 2,
-			column = 0,
-			rowspan = 6,
-			columnspan = 2
+			row=2,
+			column=0,
+			rowspan=6,
+			columnspan=2
 		)
 
 		shutdown_button = tk.Button(
@@ -1380,7 +1453,7 @@ def ACOS_Menu_click(event):
 			x=globals()["navbar_size"],
 			y=0,
 			width=400,
-			height=400
+			height=800
 		)
 
 def create_new_user(window: tk.Tk, REGISTRY: dict):
@@ -1424,9 +1497,9 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 			"ProfileImage": pfp_name,
 			"HASH": globals()["password_salt"],
 			"PASSWORD": globals()["password"],
-		    "taskbar": REGISTRY["DEFAULT_APPS"],
+			"taskbar": REGISTRY["DEFAULT_APPS"],
 			"is_admin": True,
-            "startup_apps": []
+			"startup_apps": []
 		}
 
 		userdata_file = open("ROOT/" + REGISTRY["USERS_FOLDER"] \
