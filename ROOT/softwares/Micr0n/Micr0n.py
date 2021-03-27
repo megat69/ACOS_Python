@@ -57,10 +57,10 @@ def on_app_launch(frame:tk.Frame, width:int=900, height:int=640):
 		sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 		# Tk must be initialized before CEF otherwise fatal error (Issue #306)
 		app = MainFrame(frame)
-		settings = {}
+		settings = {"cache_path":f"ROOT/{software_api.REGISTRY['USERS_FOLDER']}/{software_api.REGISTRY['USERDATA_NAME']}"}
 		if MAC:
 			settings["external_message_pump"] = True
-		cef.Initialize(settings=settings)
+		cef.Initialize(settings=settings, switches={"enable-media-stream": True})
 	else:
 		if not "no_connection_title" in globals():
 			globals()["no_connection_title"] = tk.Label(
