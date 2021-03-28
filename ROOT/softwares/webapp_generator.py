@@ -1,5 +1,19 @@
 from cefpython3 import cefpython as cef
 import ctypes
+import json
+try:
+	registry_file = open("../../registry.json", "r")
+except FileNotFoundError:
+	registry_file = open("registry.json", "r")
+REGISTRY = json.load(registry_file)
+registry_file.close()
+try:
+	general_data_file = open("../../general_data.json", "r")
+except FileNotFoundError:
+	general_data_file = open("general_data.json", "r")
+general_data = json.load(general_data_file)
+
+current_user = general_data["last_connected_user"]
 
 try:
 	import tkinter as tk
@@ -39,9 +53,11 @@ def launch(frame, URL, **settings):
 	sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
 	# Tk must be initialized before CEF otherwise fatal error (Issue #306)
 	app = MainFrame(frame, URL)
+	if not "cache_path" in settings.keys():
+		settings["cache_path"] = f"ROOT/{REGISTRY['USERS_FOLDER']}/{current_user}/{REGISTRY['USERDATA_NAME']}"
 	if MAC:
 		settings["external_message_pump"] = True
-	cef.Initialize(settings=settings)
+	cef.Initialize(settings=settings, switches={"enable-media-stream": True})
 
 class MainFrame(tk.Frame):
 	def __init__(self, frame, URL):

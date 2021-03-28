@@ -269,7 +269,7 @@ def on_app_launch(frame:tk.Frame, width:int=100, height:int=100):
 		text = "Check for updates",
 		command = check_updates_launch
 	)
-	#update_checker_btn.grid(row=frame.grid_size()[1], column=0, columnspan=2)
+	update_checker_btn.grid(row=frame.grid_size()[1], column=0, columnspan=2)
 
 	def install_update_launch():
 		install_update()
