@@ -76,7 +76,7 @@ def uninstall_app():
 			text=f"The app {app_name_entry.get()} is not installed.",
 			fg="red"
 		)
-		return
+		return False
 
 	# ------- CONFIRM -------
 	confirm_box = messagebox.askquestion(
@@ -90,7 +90,7 @@ def uninstall_app():
 			text="Uninstall cancelled.",
 			fg="red"
 		)
-		return
+		return False
 
 	# ------- App uninstall --------
 	shutil.rmtree(f"ROOT/{REGISTRY['SOFTWARES_FOLDER']}/{app_name_entry.get()}")
@@ -138,7 +138,12 @@ install_local_app_button.pack()
 
 def update_app():
 	app_name = app_name_entry.get()
-	uninstall_app()
+	if uninstall_app() is False:
+		message.config(
+			text=f"Update cancelled.",
+			fg="green"
+		)
+		return
 	app_name_entry.insert(0, app_name)
 	install_app()
 

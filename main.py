@@ -1,6 +1,7 @@
 import importlib
 import json
 import os
+import platform
 import shutil
 import sys
 import tkinter as tk
@@ -1536,7 +1537,12 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 			"#000000"
 		)
 
-		window.after(8000, finish_boot, window, REGISTRY)
+		window.after(8000, reboot, window, REGISTRY)
+
+	def reboot(window, REGISTRY):
+		suffix = '' if platform.platform() == "Windows" else '3'
+		os.system(f"python{suffix} boot.py")
+		window.destroy()
 
 	def display_password():
 		password_entry.pack()
