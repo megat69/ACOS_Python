@@ -8,6 +8,9 @@ import zipfile
 suffix = '' if platform.platform() == "Windows" else '3'
 
 os.system(f"pip{suffix} install -r requirements.txt")
+if os.name != "nt":
+  os.system("sudo apt-get install python3-tk")
+  os.system("sudo apt-get install python3-pil python3-pil.imagetk")
 
 def download_repo(URL:str, folder:str, files_to_delete:(list, tuple)=(".gitattributes", "README.md"), log:bool=True, notify_function=print, *args, **kwargs):
 	"""
