@@ -45,6 +45,7 @@ def ThrowBSOD(window: tk.Tk, message=""):
 	"""
 	Throws the BSOD and exits.
 	"""
+	print(message)
 	# ------------------ WIDGET DESTRUCTION ------------------
 	destroy_all_widgets(window)
 
@@ -55,7 +56,7 @@ def ThrowBSOD(window: tk.Tk, message=""):
 	main_label = tk.Label(
 		window,
 		text=TRANSLATIONS["BSOD"]["SysError"],
-		font=("Impact", 36),
+		font=("Haettenschweiler", 36),
 		bg=BSOD_COLOR,
 		fg="white"
 	)
@@ -66,7 +67,7 @@ def ThrowBSOD(window: tk.Tk, message=""):
 	message_label = tk.Label(
 		window,
 		text=TRANSLATIONS["BSOD"][message] if message in TRANSLATIONS.keys() else message,
-		font=("Impact", 18),
+		font=("Haettenschweiler", 18),
 		bg=BSOD_COLOR,
 		fg="white"
 	)
@@ -77,7 +78,7 @@ def ThrowBSOD(window: tk.Tk, message=""):
 	reboot_label = tk.Label(
 		window,
 		text=TRANSLATIONS["BSOD"]["RebootMsg"],
-		font=("Impact", 24),
+		font=("Haettenschweiler", 24),
 		bg=BSOD_COLOR,
 		fg="white"
 	)
@@ -154,7 +155,7 @@ def start_OS(window: tk.Tk, REGISTRY: dict):
 				command=partial(select_user, user, window, REGISTRY),
 				bg=REGISTRY["MAIN_BG_COLOR"][globals()["current_theme"]],
 				fg=REGISTRY["MAIN_FG_COLOR"][globals()["current_theme"]],
-				font=("Calibri Light", 20)
+				font=("Haettenschweiler Light", 20)
 			)
 		)
 		users_list[-1].place(
@@ -175,7 +176,7 @@ def start_OS(window: tk.Tk, REGISTRY: dict):
 	globals()["username_label"] = tk.Label(
 		window,
 		text=last_connected_user,
-		font=("Calibri Light", 26),
+		font=("Haettenschweiler Light", 26),
 		fg=REGISTRY["MAIN_FG_COLOR"][globals()["current_theme"]],
 		bg=REGISTRY["MAIN_BG_COLOR"][globals()["current_theme"]]
 	)
@@ -565,8 +566,11 @@ def setup_topbar(window, REGISTRY):
 
 	# Battery displaying
 	def get_battery_string():
-		battery = psutil.sensors_battery()
-		return f"{battery.percent}%{', Charging' if battery.power_plugged else ''}"
+		try:
+			battery = psutil.sensors_battery()
+			return f"{battery.percent}%{', Charging' if battery.power_plugged else ''}"
+		except:
+			pass
 
 	def set_battery_string():
 		globals()["topbar_battery_status"].config(text=get_battery_string())
@@ -1232,7 +1236,7 @@ def ACOS_Menu_click(event):
 			column0 = tk.Label(
 				globals()["frame_task_manager_MAIN"],
 				text=TRANSLATIONS["ACOS_MENU"]["TaskName"],
-				font=("Impact", 12)
+				font=("Haettenschweiler", 12)
 			)
 			column0.grid(row=0, column=0)
 
@@ -1599,7 +1603,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		textvariable=password_var,
 		bg=background,
 		fg=background,
-		font=("Calibri", 18),
+		font=("Haettenschweiler", 18),
 		insertbackground="white"
 	)
 	password_validate = tk.Button(
@@ -1607,7 +1611,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		text="SAVE",  # TODO : Translations
 		bg=background,
 		fg=background,
-		font=("Calibri", 18),
+		font=("Haettenschweiler", 18),
 		command=save_password
 	)
 
@@ -1696,7 +1700,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		command=load_profile_picture,
 		bg=background,
 		fg=background,
-		font=("Impact", 16)
+		font=("Haettenschweiler", 16)
 	)
 	load_pfp_button.grid(row=0, column=0, sticky="e")
 	no_pfp_button = tk.Button(
@@ -1705,10 +1709,10 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		command=validate_pfp,
 		bg=background,
 		fg=background,
-		font=("Impact", 16)
+		font=("Haettenschweiler", 16)
 	)
 	no_pfp_button.grid(row=0, column=2, sticky="w")
-	pfp_or_label = tk.Label(pfp_frame, text="or", bg=background, fg=background, font=("Impact", 16))
+	pfp_or_label = tk.Label(pfp_frame, text="or", bg=background, fg=background, font=("Haettenschweiler", 16))
 	pfp_or_label.grid(row=0, column=1)
 
 	def display_username_entry():
@@ -1798,7 +1802,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		textvariable=username_entry_var,
 		bg=background,
 		fg=background,
-		font=("Calibri", 18),
+		font=("Haettenschweiler", 18),
 		insertbackground="white"
 	)
 	username_save_button = tk.Button(
@@ -1808,7 +1812,7 @@ def create_new_user(window: tk.Tk, REGISTRY: dict):
 		fg=background,
 		command=save_username,
 		bd=0,
-		font=("Impact", 14)
+		font=("Haettenschweiler", 14)
 	)
 
 	def start_text_blend(text, function_to_execute=None):
