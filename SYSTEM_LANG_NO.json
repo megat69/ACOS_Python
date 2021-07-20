@@ -1,1 +1,24 @@
-
+{
+  "BSOD": {
+    "SysError": "Systemet ditt stakk inn i en error",
+    "RebootMsg": "Start på nytt systemet ditt.",
+    "CorruptedKey": "Register nøkkel '{key}' er ødelagt.\nSjekk nøkkelen manuelt eller start på nytt systemet ditt.",
+    "GeneralDataKey": "Nøkkel lagret i 'general_data.json'",
+    "UnableLoadRegistry": "Register nøkkel kunne ikke bli lastet inn.",
+    "IconNotFound": "Ikon ikke funnet",
+    "RegistryErrorUnknown": "En ukjent error oppstod under åpningen av register."
+  },
+  "LOGIN": {
+    "IncorrectPassword": "Feil passord."
+  },
+  "ACOS_MENU": {
+    "Shutdown": "Skru av",
+    "CloseAllWindows": "Lukk alle vinduer",
+    "Settings": "Instillinger",
+    "TaskManager": "Oppgavebehandling",
+    "TaskKill": "Drep prosess",
+    "TaskName": "Prosess navn",
+    "MemoryUsage": "Minne bruk",
+    "ProcessorUsage": "Prosessor bruk"
+  }
+}
