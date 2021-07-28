@@ -18,7 +18,7 @@
     "NAVBAR_SIZE": 64,
     "WIN_HEIGHT": 512,
     "WIN_WIDTH": 1024,
-    "SYSTEM_LANG": "fr",
+    "SYSTEM_LANG": "en",
     "SOFTWARES_FOLDER": "softwares",
     "FULLSCREEN_ENABLED": true,
     "USERS_FOLDER": "users",
@@ -38,5 +38,8 @@
     "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
     "SPACING_BETWEEN_TOPBAR_ELEMENTS": 10,
     "TOPBAR_POSITION_ON_TOP": true,
-    "DESKTOP_FONT": ["Helvetica", 12]
+    "DESKTOP_FONT": [
+        "Helvetica",
+        12
+    ]
 }

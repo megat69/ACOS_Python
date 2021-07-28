@@ -11,6 +11,7 @@ from random import randint
 from tkinter import filedialog
 import psutil
 import datetime
+from pyautogui import position
 
 from PIL import Image, ImageTk
 
@@ -753,11 +754,14 @@ def launched_app(app, min_size, max_size, event):
 		bg=background_color
 	)
 
-	def Lift(event):
+	def Lift(_):
 		"""
 		Lifts the frame on top.
 		"""
 		globals()[f"frame_{app.software_dir}_{instance}"].lift()
+		globals()["w_mouse_orig"] = [position()[0], position()[1]]
+		globals()["w_mouse_orig"][0] -= globals()[f"{app.software_dir}_{instance}_last_coords"][0]
+		globals()["w_mouse_orig"][1] -= globals()[f"{app.software_dir}_{instance}_last_coords"][1]
 
 	globals()[f"{app.software_dir}_{instance}_last_coords"] = \
 		(randint(
@@ -769,23 +773,20 @@ def launched_app(app, min_size, max_size, event):
 		)
 		)
 
-	def Drag(event):
+	def Drag(_):
 		"""
 		Generates the dragging of the window.
 		"""
-		x = event.x + (globals()[f"frame_{app.software_dir}_{instance}"].winfo_width() // 2)
-		y = event.y + (globals()[f"frame_{app.software_dir}_{instance}"].winfo_height() // 2)
+		x = position()[0] - globals()["w_mouse_orig"][0]
+		y = position()[1] - globals()["w_mouse_orig"][1]
 
-		if isclose(globals()[f"{app.software_dir}_{instance}_last_coords"][0],
-			x, rel_tol=5) and isclose(globals()[f"{app.software_dir}_{instance}_last_coords"][1],
-			y, rel_tol=5):
+		globals()[f"frame_{app.software_dir}_{instance}"].place(
+			x=x,
+			y=y
+		)
 
-			globals()[f"frame_{app.software_dir}_{instance}"].place(
-				x=x,
-				y=y
-			)
-
-			globals()[f"{app.software_dir}_{instance}_last_coords"] = (x, y)
+		globals()[f"{app.software_dir}_{instance}_last_coords"] = (x, y)
+		
 
 	globals()[f"frame_{app.software_dir}_{instance}"].bind('<B1-Motion>', Drag)
 	globals()[f"frame_{app.software_dir}_{instance}"].bind('<Button-1>', Lift)
@@ -822,7 +823,8 @@ def launched_app(app, min_size, max_size, event):
 	)
 	app_title.place(
 		x=icon_size + 2,
-		y=0
+		y=0,
+		height=icon_size+4
 	)
 
 	def quit_app(app):
@@ -864,7 +866,7 @@ def launched_app(app, min_size, max_size, event):
 		try:
 			expand_button.place(
 				x=parent_width - icon_size * 2 - 4,
-				y=4,
+				y=2,
 				height=icon_size,
 				width=icon_size
 			)
@@ -932,7 +934,7 @@ def launched_app(app, min_size, max_size, event):
 		)
 		expand_button.place(
 			x=parent_width - icon_size * 2 - 4,
-			y=4,
+			y=2,
 			height=icon_size,
 			width=icon_size
 		)
@@ -995,7 +997,7 @@ def launched_app(app, min_size, max_size, event):
 		)
 		expand_button.place(
 			x=parent_width - icon_size * 2 - 4,
-			y=4,
+			y=2,
 			height=icon_size,
 			width=icon_size
 		)
@@ -1062,6 +1064,9 @@ def ACOS_Menu_click(event):
 				Lifts the frame on top.
 				"""
 				globals()["frame_task_manager"].lift()
+				globals()["w_mouse_orig"] = [position()[0], position()[1]]
+				globals()["w_mouse_orig"][0] -= globals()[f"frame_task_manager_last_coords"][0]
+				globals()["w_mouse_orig"][1] -= globals()[f"frame_task_manager_last_coords"][1]
 				task_manager_code()
 
 			globals()["frame_task_manager_last_coords"] = \
@@ -1074,23 +1079,18 @@ def ACOS_Menu_click(event):
 				)
 				)
 
-			def Drag(event):
+			def Drag(_):
 				"""
 				Generates the dragging of the window.
 				"""
-				x = event.x + (globals()["frame_task_manager"].winfo_width() // 2)
-				y = event.y + (globals()["frame_task_manager"].winfo_height() // 2)
+				x = position()[0] - globals()["w_mouse_orig"][0]
+				y = position()[1] - globals()["w_mouse_orig"][1]
+				globals()["frame_task_manager"].place(
+					x=x,
+					y=y
+				)
 
-				if isclose(globals()["frame_task_manager_last_coords"][0],
-				           x, rel_tol=5) and isclose(globals()["frame_task_manager_last_coords"][1],
-				                                     y, rel_tol=5):
-
-					globals()["frame_task_manager"].place(
-						x=x,
-						y=y
-					)
-
-					globals()["frame_task_manager_last_coords"] = (x, y)
+				globals()["frame_task_manager_last_coords"] = (x, y)
 
 			globals()["frame_task_manager"].bind('<B1-Motion>', Drag)
 			globals()["frame_task_manager"].bind('<Button-1>', Lift)
@@ -1127,7 +1127,8 @@ def ACOS_Menu_click(event):
 			)
 			app_title.place(
 				x=icon_size + 2,
-				y=0
+				y=0,
+				height=icon_size+4
 			)
 
 			def quit_app():
@@ -1257,6 +1258,8 @@ def ACOS_Menu_click(event):
 			column2.grid(row=0, column=2)
 
 			# TODO : Scrollbar
+			# I'm not doing the scrolbar
+			#  - Woffle
 
 			tasks = []
 			task_kill_buttons = []

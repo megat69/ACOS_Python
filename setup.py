@@ -5,9 +5,7 @@ import requests
 import json
 import zipfile
 
-suffix = '' if platform.platform() == "Windows" else '3'
-
-os.system(f"pip{suffix} install -r requirements.txt")
+os.system(f"python -m pip install -r requirements.txt")
 if os.name != "nt":
   os.system("sudo apt-get install python3-tk")
   os.system("sudo apt-get install python3-pil python3-pil.imagetk")

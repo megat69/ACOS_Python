@@ -6,3 +6,4 @@ easydev
 python-dotenv
 requests
 packaging
+pyautogui
